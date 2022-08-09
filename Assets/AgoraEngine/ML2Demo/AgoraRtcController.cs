@@ -58,11 +58,6 @@ namespace agora_sample
 
         private void Start()
         {
-            bool granted = RequestPermissions();
-            if (granted)
-            {
-                CustomVideoCapture.StartVideoSource();
-            }
             if (appReady)
             {
                 InitEngine(JoinChannel);
@@ -112,7 +107,8 @@ namespace agora_sample
 
             if (UseToken)
             {
-                TokenClient.Instance?.GetTokens(CHANNEL_NAME, _clientUID, (token, _) => {
+                TokenClient.Instance?.GetTokens(CHANNEL_NAME, _clientUID, (token, _) =>
+                {
                     TOKEN = token;
                     Debug.Log("Gotten token:" + token);
                     callback();
@@ -203,28 +199,6 @@ namespace agora_sample
                 _rtcEngine.DisableVideoObserver();
                 IRtcEngine.Destroy();
             }
-        }
- 
-        /// <summary>
-        /// Request Privileges.
-        /// </summary>
-        private bool RequestPermissions()
-        {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLResult result = MLPermissions.RequestPermission(MLPermission.Camera);
-
-            if (result.IsOk)
-                return result.IsOk;
-
-            Debug.LogErrorFormat(
-                "Error: ImageCaptureExample failed to get requested permissions, disabling script. Reason: {0}",
-                result);
-            enabled = false;
-
-            return result.IsOk;
-#else
-            return false;
-#endif
         }
 
     }

@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
+
 using agora_gaming_rtc;
 
 public class CustomVideoCapturer : MonoBehaviour
@@ -26,9 +29,19 @@ public class CustomVideoCapturer : MonoBehaviour
 
     IRtcEngine _rtcEngine = null;
 
-    private IEnumerator Start()
+    private async void Start()
     {
-        yield return new WaitUntil(() => IRtcEngine.QueryEngine() != null);
+        var requestResult = await RequestPermission(MLPermission.Camera);
+        if (!requestResult)
+        {
+            Debug.LogError($"Camera capture will not be available.");
+            return;
+        }
+        StartCoroutine(EnableMLCamera());
+        while (IRtcEngine.QueryEngine() == null)
+        {
+            await Task.Delay(50);
+        }
         _rtcEngine = IRtcEngine.QueryEngine();
     }
 
@@ -40,33 +53,54 @@ public class CustomVideoCapturer : MonoBehaviour
         DisconnectCamera();
     }
 
-    public void StartVideoSource()
+    private async Task<bool> RequestPermission(string permission)
     {
-        StartCoroutine(EnableMLCamera());
-    }
+        if (MLPermissions.CheckPermission(permission) == MLResult.Code.Ok)
+            return true;
 
+        bool answer = false;
+        bool requestResult = false;
 
-    /// <summary>
-    /// Request Privileges.
-    /// </summary>
-    private bool RequestPermissions()
-    {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-        MLResult result = MLPermissions.RequestPermission(MLPermission.Camera);
+        MLPermissions.Callbacks requestCallbacks = new MLPermissions.Callbacks();
+        requestCallbacks.OnPermissionGranted += grantedPermission =>
+        {
+            answer = true;
+            requestResult = true;
+        };
 
-        if (result.IsOk)
-            return result.IsOk;
+        requestCallbacks.OnPermissionDenied += deniedPermission =>
+        {
+            answer = true;
 
-        Debug.LogErrorFormat(
-            "Error: ImageCaptureExample failed to get requested permissions, disabling script. Reason: {0}",
-            result);
-        enabled = false;
+            Debug.LogError($"Request for {deniedPermission} permission was denied.");
+        };
 
-        return result.IsOk;
-#else
+        requestCallbacks.OnPermissionDeniedAndDontAskAgain += deniedPermission =>
+        {
+            answer = true;
+
+            Debug.LogError($"Request for {deniedPermission} permission was denied.");
+        };
+
+        var result = MLPermissions.RequestPermission(permission, requestCallbacks);
+        if (!MLResult.DidNativeCallSucceed(result.Result, nameof(MLPermissions.RequestPermission)))
+        {
+            Debug.LogError($"Request for {permission} permission was denied.");
             return false;
-#endif
+        }
+
+        var waitTask = Task.Run(async () =>
+        {
+            while (!answer)
+                await Task.Delay(25);
+        });
+
+        if (waitTask != await Task.WhenAny(waitTask))
+            throw new TimeoutException();
+
+        return requestResult;
     }
+
     /// <summary>
     /// Connects the MLCamera component and instantiates a new instance
     /// if it was never created.
