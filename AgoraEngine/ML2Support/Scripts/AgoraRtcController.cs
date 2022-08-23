@@ -3,10 +3,13 @@ using UnityEngine.UI;
 using agora_gaming_rtc;
 using agora_utilities;
 
-using UnityEngine.XR.MagicLeap;
-
 namespace agora_sample
 {
+    /// <summary>
+    ///    The AgoraRtcController serves as the simple plugin controller for MagicLeap2.
+    ///  It sets up the application with the essential Audio Video control, API methods and callbacks for
+    ///  Agora Live Streaming purpose.   
+    /// </summary>
     public class AgoraRtcController : MonoBehaviour
     {
         [Header("Agora SDK Parameters")]
@@ -25,7 +28,7 @@ namespace agora_sample
         [Header("UI Manager")]
         [SerializeField] GameObject SpawnPoint;
         [SerializeField] Text logText;
-        [SerializeField] VideoSurface NewUserView;
+        [SerializeField] Transform ReferenceTransform;
         [SerializeField] ToggleStateButton MuteLocalButton;
         [SerializeField] ToggleStateButton MuteRemoteButton;
 
@@ -52,7 +55,7 @@ namespace agora_sample
             if (appReady)
             {
                 InitUI();
-                VideoRenderMgr = new VideoRenderManager(SpawnPoint.transform, NewUserView.transform);
+                VideoRenderMgr = new VideoRenderManager(SpawnPoint.transform, ReferenceTransform);
             }
         }
 
@@ -157,9 +160,12 @@ namespace agora_sample
             _logger.UpdateLog(string.Format("OnUserJoined uid: {0} elapsed: {1}", uid, elapsed));
             VideoRenderMgr.MakeVideoView(uid);
 
-            NewUserView.enabled = true;
-            NewUserView.SetEnable(true);
-            NewUserView.SetForUser(uid);
+            //if (NewUserView != null)
+            //{
+            //    NewUserView.enabled = true;
+            //    NewUserView.SetEnable(true);
+            //    NewUserView.SetForUser(uid);
+            //}
         }
 
         void OnUserOfflineHandler(uint uid, USER_OFFLINE_REASON reason)

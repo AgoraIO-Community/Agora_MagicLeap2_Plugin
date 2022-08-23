@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +6,11 @@ using agora_utilities;
 
 namespace agora_sample
 {
+    /// <summary>
+    ///   The Video Render Manager manages the remote user's view transform.  
+    /// In this example class, a referenceTransform is passed in for setting up the rotation
+    /// value for the views.
+    /// </summary>
     public class VideoRenderManager : IVideoRenderManager
     {
         // view control
