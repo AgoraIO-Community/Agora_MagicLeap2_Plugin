@@ -10,6 +10,8 @@ using agora_gaming_rtc;
 
 public class CustomVideoCapturer : MonoBehaviour
 {
+    private IRtcEngine _rtcEngine = null;
+
     #region -- MagicLeap --
 
     private bool IsCameraConnected => captureCamera != null && captureCamera.ConnectionEstablished;
@@ -27,22 +29,26 @@ public class CustomVideoCapturer : MonoBehaviour
     [SerializeField]
     MLCamera.ConnectFlag MRConnectFlag = MLCamera.ConnectFlag.MR;
 
-    IRtcEngine _rtcEngine = null;
-
-    private async void Start()
+    private readonly MLPermissions.Callbacks permissionCallbacks = new MLPermissions.Callbacks();
+    private void Awake()
     {
-        var requestResult = await RequestPermission(MLPermission.Camera);
-        if (!requestResult)
+        permissionCallbacks.OnPermissionGranted += OnPermissionGranted;
+        permissionCallbacks.OnPermissionDenied += OnPermissionDenied;
+        permissionCallbacks.OnPermissionDeniedAndDontAskAgain += OnPermissionDenied;
+    }
+    private IEnumerator Start()
+    {
+        MLPermissions.RequestPermission(MLPermission.Camera, permissionCallbacks);
+        MLPermissions.RequestPermission(MLPermission.RecordAudio, permissionCallbacks);
+
+        TryEnableMLCamera();
+
+        while (_rtcEngine == null)
         {
-            Debug.LogError($"Camera capture will not be available.");
-            return;
+            yield return new WaitForSeconds(0.1f);
+            // Main logic controller should initialize the RTCEngine with AppID
+            _rtcEngine = IRtcEngine.QueryEngine();
         }
-        StartCoroutine(EnableMLCamera());
-        while (IRtcEngine.QueryEngine() == null)
-        {
-            await Task.Delay(50);
-        }
-        _rtcEngine = IRtcEngine.QueryEngine();
     }
 
     /// <summary>
@@ -53,52 +59,42 @@ public class CustomVideoCapturer : MonoBehaviour
         DisconnectCamera();
     }
 
-    private async Task<bool> RequestPermission(string permission)
+    private void OnPermissionDenied(string permission)
     {
-        if (MLPermissions.CheckPermission(permission) == MLResult.Code.Ok)
-            return true;
-
-        bool answer = false;
-        bool requestResult = false;
-
-        MLPermissions.Callbacks requestCallbacks = new MLPermissions.Callbacks();
-        requestCallbacks.OnPermissionGranted += grantedPermission =>
+        if (permission == MLPermission.Camera)
         {
-            answer = true;
-            requestResult = true;
-        };
-
-        requestCallbacks.OnPermissionDenied += deniedPermission =>
+#if UNITY_ANDROID
+            MLPluginLog.Error($"{permission} denied, example won't function.");
+#endif
+        }
+        else if (permission == MLPermission.RecordAudio)
         {
-            answer = true;
-
-            Debug.LogError($"Request for {deniedPermission} permission was denied.");
-        };
-
-        requestCallbacks.OnPermissionDeniedAndDontAskAgain += deniedPermission =>
-        {
-            answer = true;
-
-            Debug.LogError($"Request for {deniedPermission} permission was denied.");
-        };
-
-        var result = MLPermissions.RequestPermission(permission, requestCallbacks);
-        if (!MLResult.DidNativeCallSucceed(result.Result, nameof(MLPermissions.RequestPermission)))
-        {
-            Debug.LogError($"Request for {permission} permission was denied.");
-            return false;
+#if UNITY_ANDROID
+            MLPluginLog.Error($"{permission} denied, audio wont be recorded in the file.");
+#endif
         }
 
-        var waitTask = Task.Run(async () =>
+    }
+
+    private void OnPermissionGranted(string permission)
+    {
+#if UNITY_ANDROID
+        MLPluginLog.Debug($"Granted {permission}.");
+        TryEnableMLCamera();
+#endif
+    }
+
+
+    private void TryEnableMLCamera()
+    {
+        if (!MLPermissions.CheckPermission(MLPermission.Camera).IsOk)
         {
-            while (!answer)
-                await Task.Delay(25);
-        });
+            Debug.LogError("Permission not ok");
+            MLPluginLog.Warning("ML camera permission is not ok");
+            return;
+        }
 
-        if (waitTask != await Task.WhenAny(waitTask))
-            throw new TimeoutException();
-
-        return requestResult;
+        StartCoroutine(EnableMLCamera());
     }
 
     /// <summary>
