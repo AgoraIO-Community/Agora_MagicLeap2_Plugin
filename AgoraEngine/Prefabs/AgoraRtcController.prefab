@@ -345,7 +345,7 @@ GameObject:
   - component: {fileID: 8140917783476828377}
   - component: {fileID: 8140917783476828376}
   m_Layer: 0
-  m_Name: AgoraController
+  m_Name: AgoraRtcController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

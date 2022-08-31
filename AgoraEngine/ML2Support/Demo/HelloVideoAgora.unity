@@ -422,7 +422,7 @@ GameObject:
   - component: {fileID: 388581340}
   - component: {fileID: 388581339}
   - component: {fileID: 388581338}
-  - component: {fileID: 388581337}
+  - component: {fileID: 388581342}
   m_Layer: 5
   m_Name: Button (1)
   m_TagString: Untagged
@@ -430,18 +430,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &388581337
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 388581336}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88c9ae345ade1964aaff0f12e6c75851, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &388581338
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -545,6 +533,18 @@ RectTransform:
   m_AnchoredPosition: {x: 189.3, y: -193.6}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &388581342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388581336}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88c9ae345ade1964aaff0f12e6c75851, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &830712858
 GameObject:
   m_ObjectHideFlags: 0
@@ -1435,6 +1435,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1808367787147639912, guid: 9ffe5dc1c419cb54ab4742b0eb5bbc1a,
+        type: 3}
+      propertyPath: MRQuality
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 1904446763899903680, guid: 9ffe5dc1c419cb54ab4742b0eb5bbc1a,
         type: 3}
       propertyPath: serverURL
@@ -1504,7 +1509,12 @@ PrefabInstance:
         type: 3}
       propertyPath: MuteRemoteButton
       value: 
-      objectReference: {fileID: 388581337}
+      objectReference: {fileID: 388581342}
+    - target: {fileID: 8140917783476828376, guid: 9ffe5dc1c419cb54ab4742b0eb5bbc1a,
+        type: 3}
+      propertyPath: ReferenceTransform
+      value: 
+      objectReference: {fileID: 1256576345}
     - target: {fileID: 8140917783476828377, guid: 9ffe5dc1c419cb54ab4742b0eb5bbc1a,
         type: 3}
       propertyPath: m_RootOrder

@@ -10,7 +10,7 @@ namespace agora_sample
     ///  It sets up the application with the essential Audio Video control, API methods and callbacks for
     ///  Agora Live Streaming purpose.   
     /// </summary>
-    public class AgoraRtcController : MonoBehaviour
+    public class AgoraController : MonoBehaviour
     {
         [Header("Agora SDK Parameters")]
         [SerializeField]
@@ -43,7 +43,7 @@ namespace agora_sample
         [SerializeField]
         CustomAudioCapturer CustomAudioCapture;
 
-        private Logger _logger;
+        private agora_utilities.Logger _logger;
         private IRtcEngine _rtcEngine = null;
         private uint _clientUID = 0;  // used for join channel, default is 0
 
@@ -74,7 +74,7 @@ namespace agora_sample
                 Debug.LogError($"----- AppID must be provided for {name}! -----");
                 return false;
             }
-            _logger = new Logger(logText);
+            _logger = new agora_utilities.Logger(logText);
             return true;
         }
 
