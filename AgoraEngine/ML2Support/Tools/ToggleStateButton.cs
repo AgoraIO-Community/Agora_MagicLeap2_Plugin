@@ -1,59 +1,61 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
-[RequireComponent(typeof(Button))]
-public class ToggleStateButton : MonoBehaviour
+namespace agora_utilities
 {
-    public bool OnOffState { get; private set; }
-    public string OnStateText { get; private set; }
-    public string OffStateText { get; private set; }
-
-    private Button button;
-    private Text text;
-    private bool initState;
-
-    public void Setup(bool initOnOff, string onStateText, string offStateText, System.Action callOnAction, System.Action callOffAction)
+    [RequireComponent(typeof(Button))]
+    public class ToggleStateButton : MonoBehaviour
     {
-        button = GetComponent<Button>();
-        text = button.GetComponentInChildren<Text>();
-        OnOffState = initOnOff;
-        OnStateText = onStateText;
-        OffStateText = offStateText;
-        initState = initOnOff;
+        public bool OnOffState { get; private set; }
+        public string OnStateText { get; private set; }
+        public string OffStateText { get; private set; }
 
-        UpdateText();
+        private Button button;
+        private Text text;
+        private bool initState;
 
-        button.onClick.AddListener(() =>
+        public void Setup(bool initOnOff, string onStateText, string offStateText, System.Action callOnAction, System.Action callOffAction)
         {
-            OnOffState = !OnOffState;
+            button = GetComponent<Button>();
+            text = button.GetComponentInChildren<Text>();
+            OnOffState = initOnOff;
+            OnStateText = onStateText;
+            OffStateText = offStateText;
+            initState = initOnOff;
+
             UpdateText();
-            if (OnOffState)
+
+            button.onClick.AddListener(() =>
             {
-                callOnAction();
-            }
-            else
-            {
-                callOffAction();
-            }
-        });
-    }
+                OnOffState = !OnOffState;
+                UpdateText();
+                if (OnOffState)
+                {
+                    callOnAction();
+                }
+                else
+                {
+                    callOffAction();
+                }
+            });
+        }
 
-    public void SetState(bool onOffState)
-    {
-        OnOffState = onOffState;
-        UpdateText();
-    }
-
-    public void Reset()
-    {
-        SetState(initState);
-    }
-
-    void UpdateText()
-    {
-        if (text != null)
+        public void SetState(bool onOffState)
         {
-            text.text = OnOffState ? OffStateText : OnStateText;
+            OnOffState = onOffState;
+            UpdateText();
+        }
+
+        public void Reset()
+        {
+            SetState(initState);
+        }
+
+        void UpdateText()
+        {
+            if (text != null)
+            {
+                text.text = OnOffState ? OffStateText : OnStateText;
+            }
         }
     }
 }

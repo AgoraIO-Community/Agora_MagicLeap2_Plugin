@@ -1,44 +1,47 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-///   The Logger class provides a simply on screen logging output.
-/// An UI Text is required for writing the output.  If not provided,
-/// the log can only be seen from the system Debug output.
-/// </summary>
-public class Logger
+namespace agora_utilities
 {
-    Text text;
-
-    public Logger(Text text)
+    /// <summary>
+    ///   The Logger class provides a simply on screen logging output.
+    /// An UI Text is required for writing the output.  If not provided,
+    /// the log can only be seen from the system Debug output.
+    /// </summary>
+    public class Logger
     {
-        this.text = text;
-    }
+        Text text;
 
-    public void UpdateLog(string logMessage)
-    {
-        Debug.Log(logMessage);
-        if (text != null)
+        public Logger(Text text)
         {
-            string srcLogMessage = text.text;
-            if (srcLogMessage.Length > 1000)
+            this.text = text;
+        }
+
+        public void UpdateLog(string logMessage)
+        {
+            Debug.Log(logMessage);
+            if (text != null)
             {
-                srcLogMessage = "";
+                string srcLogMessage = text.text;
+                if (srcLogMessage.Length > 1000)
+                {
+                    srcLogMessage = "";
+                }
+                srcLogMessage += "\r\n \r\n";
+                srcLogMessage += logMessage;
+                text.text = srcLogMessage;
             }
-            srcLogMessage += "\r\n \r\n";
-            srcLogMessage += logMessage;
-            text.text = srcLogMessage;
         }
-    }
 
-    public bool DebugAssert(bool condition, string message)
-    {
-        if (!condition)
+        public bool DebugAssert(bool condition, string message)
         {
-            UpdateLog(message);
-            return false;
+            if (!condition)
+            {
+                UpdateLog(message);
+                return false;
+            }
+            Debug.Assert(condition, message);
+            return true;
         }
-        Debug.Assert(condition, message);
-        return true;
     }
 }
