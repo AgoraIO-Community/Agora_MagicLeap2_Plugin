@@ -121,6 +121,7 @@ namespace agora_sample
 
             // set up transform
             go.transform.rotation = ReferenceTransform.rotation;
+            go.transform.Rotate(0f, 0.0f, 180.0f);
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.one;
             // configure videoSurface

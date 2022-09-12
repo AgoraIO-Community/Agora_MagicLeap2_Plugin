@@ -29,6 +29,7 @@ namespace agora_sample
         [SerializeField] GameObject SpawnPoint;
         [SerializeField] Text logText;
         [SerializeField] Transform ReferenceTransform;
+        [SerializeField] ToggleStateButton ConnectButton;
         [SerializeField] ToggleStateButton MuteLocalButton;
         [SerializeField] ToggleStateButton MuteRemoteButton;
 
@@ -125,8 +126,21 @@ namespace agora_sample
 
         void InitUI()
         {
+            ConnectButton.Setup(false, "Connect", "Disconnect",
+                callOnAction: () =>
+                {
+                    CustomVideoCapture.ConnectCamera();
+                },
+                callOffAction: () =>
+                {
+                    CustomVideoCapture.DisconnectCamera();
+                });
+
             MuteLocalButton.Setup(false, "Mute Local", "UnMute Local",
-                callOnAction: () => { _rtcEngine.MuteLocalAudioStream(true); },
+                callOnAction: () =>
+                {
+                    _rtcEngine.MuteLocalAudioStream(true);
+                },
                 callOffAction: () => { _rtcEngine.MuteLocalAudioStream(false); });
             MuteRemoteButton.Setup(false, "Mute Remote", "UnMute Remote",
                 callOnAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(true); },

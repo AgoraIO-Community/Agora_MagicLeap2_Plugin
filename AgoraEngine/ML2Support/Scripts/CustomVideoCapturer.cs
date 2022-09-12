@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 
@@ -22,12 +20,17 @@ public class CustomVideoCapturer : MonoBehaviour
     private bool cameraDeviceAvailable;
     private bool isCapturingVideo = false;
 
+    // Reference BitRate/FrameRate/Resolution table here:
+    // https://docs.agora.io/en/Interactive%20Broadcast/API%20Reference/java/classio_1_1agora_1_1rtc_1_1video_1_1_video_encoder_configuration.html#a4b090cd0e9f6d98bcf89cb1c4c2066e8
+    [SerializeField, Tooltip("Kpbs, see Agora API doc for details")]
+    int BitRate = 1000;
+
     [SerializeField]
-    MLCamera.CaptureFrameRate FrameRate = MLCamera.CaptureFrameRate._30FPS;
+    MLCamera.CaptureFrameRate MLFrameRate = MLCamera.CaptureFrameRate._30FPS;
     [SerializeField]
-    MLCamera.MRQuality MRQuality = MLCamera.MRQuality._648x720;
+    MLCamera.MRQuality MLQuality = MLCamera.MRQuality._648x720;
     [SerializeField]
-    MLCamera.ConnectFlag MRConnectFlag = MLCamera.ConnectFlag.MR;
+    MLCamera.ConnectFlag MLConnectFlag = MLCamera.ConnectFlag.MR;
 
     private readonly MLPermissions.Callbacks permissionCallbacks = new MLPermissions.Callbacks();
     private void Awake()
@@ -115,24 +118,26 @@ public class CustomVideoCapturer : MonoBehaviour
         }
 
         Debug.Log("Camera device available");
-        ConnectCamera();
+        MLPluginLog.Warning("camera device available. connecting camera...");
+
+        yield return new WaitForSeconds(2f);
     }
 
     /// <summary>
     /// Connects to the MLCamera.
     /// </summary>
-    private void ConnectCamera()
+    public void ConnectCamera()
     {
         MLCamera.ConnectContext context = MLCamera.ConnectContext.Create();
-        context.Flags = MRConnectFlag;
+        context.Flags = MLConnectFlag;
         context.EnableVideoStabilization = true;
 
         if (context.Flags != MLCamera.ConnectFlag.CamOnly)
         {
             context.MixedRealityConnectInfo = MLCamera.MRConnectInfo.Create();
-            context.MixedRealityConnectInfo.MRQuality = MRQuality;
+            context.MixedRealityConnectInfo.MRQuality = MLQuality;
             context.MixedRealityConnectInfo.MRBlendType = MLCamera.MRBlendType.Additive;
-            context.MixedRealityConnectInfo.FrameRate = FrameRate;
+            context.MixedRealityConnectInfo.FrameRate = MLFrameRate;
         }
 
         captureCamera = MLCamera.CreateAndConnect(context);
@@ -152,7 +157,7 @@ public class CustomVideoCapturer : MonoBehaviour
     /// <summary>
     /// Disconnects the camera.
     /// </summary>
-    private void DisconnectCamera()
+    public void DisconnectCamera()
     {
         if (captureCamera == null || !IsCameraConnected)
             return;
@@ -182,12 +187,13 @@ public class CustomVideoCapturer : MonoBehaviour
     private void StartVideoCapture()
     {
         MLCamera.CaptureConfig captureConfig = new MLCamera.CaptureConfig();
-        captureConfig.CaptureFrameRate = FrameRate;
+        captureConfig.CaptureFrameRate = MLFrameRate;
         captureConfig.StreamConfigs = new MLCamera.CaptureStreamConfig[1];
         captureConfig.StreamConfigs[0] =
             MLCamera.CaptureStreamConfig.Create(GetStreamCapability(), MLCamera.OutputFormat.RGBA_8888);
 
         MLResult result = captureCamera.PrepareCapture(captureConfig, out MLCamera.Metadata _);
+        SetAgoraEncoderConfiguration();
 
         if (MLResult.DidNativeCallSucceed(result.Result, nameof(captureCamera.PrepareCapture)))
         {
@@ -203,6 +209,56 @@ public class CustomVideoCapturer : MonoBehaviour
 
     }
 
+    void SetAgoraEncoderConfiguration()
+    {
+        int width = 320;
+        int height = 640;
+
+        switch (MLQuality)
+        {
+            case MLCamera.MRQuality._648x720:
+                width = 648;
+                height = 720;
+                break;
+            case MLCamera.MRQuality._972x1080:
+                width = 972;
+                height = 1080;
+                break;
+            case MLCamera.MRQuality._960x720:
+                width = 960;
+                height = 720;
+                break;
+            case MLCamera.MRQuality._1440x1080:
+                width = 1440;
+                height = 1080;
+                break;
+            case MLCamera.MRQuality._1944x2160:
+                width = 1944;
+                height = 2160;
+                break;
+            case MLCamera.MRQuality._2880x2160:
+                width = 2880;
+                height = 2160;
+                break;
+        }
+
+        FRAME_RATE frame_rate = FRAME_RATE.FRAME_RATE_FPS_30;
+        switch (MLFrameRate)
+        {
+            case MLCamera.CaptureFrameRate._15FPS:
+                frame_rate = FRAME_RATE.FRAME_RATE_FPS_15;
+                break;
+            case MLCamera.CaptureFrameRate._60FPS:
+                frame_rate = FRAME_RATE.FRAME_RATE_FPS_60;
+                break;
+        }
+        _rtcEngine.SetVideoEncoderConfiguration(new VideoEncoderConfiguration
+        {
+            frameRate = frame_rate,
+            bitrate = BitRate,
+            dimensions = new VideoDimensions { width = width, height = height }
+        });
+    }
 
     /// <summary>
     /// Stops the Video Capture.
