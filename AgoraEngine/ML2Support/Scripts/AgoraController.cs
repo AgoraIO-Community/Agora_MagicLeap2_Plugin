@@ -213,9 +213,9 @@ namespace agora_sample
 
         #endregion
 
-        void OnApplicationQuit()
+        private void OnDestroy()
         {
-            Debug.Log("OnApplicationQuit");
+            Debug.Log("OnDestroy: Agora Clean up");
             if (_rtcEngine != null)
             {
                 _rtcEngine.LeaveChannel();
