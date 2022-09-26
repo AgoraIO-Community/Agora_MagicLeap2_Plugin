@@ -6,7 +6,7 @@ using agora_utilities;
 namespace agora_sample
 {
     /// <summary>
-    ///    The AgoraRtcController serves as the simple plugin controller for MagicLeap2.
+    ///    The AgoraController serves as the simple plugin controller for MagicLeap2.
     ///  It sets up the application with the essential Audio Video control, API methods and callbacks for
     ///  Agora Live Streaming purpose.   
     /// </summary>
@@ -49,6 +49,7 @@ namespace agora_sample
         private uint _clientUID = 0;  // used for join channel, default is 0
 
         private bool appReady = false;
+
         // Use this for initialization
         void Awake()
         {
@@ -62,12 +63,14 @@ namespace agora_sample
 
         private void Start()
         {
+            // Assume automatically joining the agora channel
             if (appReady)
             {
                 InitEngine(JoinChannel);
             }
         }
 
+        // Simple check for APP ID input in case it is forgotten
         bool CheckAppId()
         {
             if (APP_ID.Length < 10)
@@ -100,6 +103,9 @@ namespace agora_sample
                 Debug.Log("[Agora] Using Custom Audio Sink");
                 _rtcEngine.SetExternalAudioSink(true, CustomAudioSink.SAMPLE_RATE, CustomAudioSink.CHANNEL);
             }
+
+
+            // Register event handlers
             _rtcEngine.OnJoinChannelSuccess += OnJoinChannelSuccessHandler;
             _rtcEngine.OnLeaveChannel += OnLeaveChannelHandler;
             _rtcEngine.OnWarning += OnSDKWarningHandler;
@@ -109,6 +115,8 @@ namespace agora_sample
             _rtcEngine.OnUserOffline += OnUserOfflineHandler;
             _rtcEngine.OnVideoSizeChanged += OnVideoSizeChanged;
 
+
+            // If AppID is certifcate enabled, use token.
             if (UseToken)
             {
                 TokenClient.Instance?.GetTokens(CHANNEL_NAME, _clientUID, (token, _) =>
@@ -124,9 +132,10 @@ namespace agora_sample
             }
         }
 
+        // Demo UI setup, using custom ToggleStateButton class
         void InitUI()
         {
-            ConnectButton.Setup(false, "Connect", "Disconnect",
+            ConnectButton.Setup(false, "Connect Camera", "Disconnect Camera",
                 callOnAction: () =>
                 {
                     CustomVideoCapture.ConnectCamera();
@@ -142,17 +151,18 @@ namespace agora_sample
                     _rtcEngine.MuteLocalAudioStream(true);
                 },
                 callOffAction: () => { _rtcEngine.MuteLocalAudioStream(false); });
+
             MuteRemoteButton.Setup(false, "Mute Remote", "UnMute Remote",
                 callOnAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(true); },
                 callOffAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(false); });
         }
 
-        #region -- Agora Event Callbacks --
         void JoinChannel()
         {
             _rtcEngine.JoinChannelByKey(TOKEN, CHANNEL_NAME, "", _clientUID);
         }
 
+        #region -- Agora Event Callbacks --
         void OnJoinChannelSuccessHandler(string channelName, uint uid, int elapsed)
         {
             _logger.UpdateLog(string.Format("sdk version: {0}", IRtcEngine.GetSdkVersion()));
@@ -160,7 +170,7 @@ namespace agora_sample
                 uid, elapsed));
 
             // Start pushing audio data
-            CustomAudioCapture?.StartPushAudioFrame();
+            CustomAudioCapture.StartPushAudioFrame();
         }
 
         void OnLeaveChannelHandler(RtcStats stats)
@@ -173,13 +183,6 @@ namespace agora_sample
         {
             _logger.UpdateLog(string.Format("OnUserJoined uid: {0} elapsed: {1}", uid, elapsed));
             VideoRenderMgr.MakeVideoView(uid);
-
-            //if (NewUserView != null)
-            //{
-            //    NewUserView.enabled = true;
-            //    NewUserView.SetEnable(true);
-            //    NewUserView.SetForUser(uid);
-            //}
         }
 
         void OnUserOfflineHandler(uint uid, USER_OFFLINE_REASON reason)
@@ -217,7 +220,10 @@ namespace agora_sample
             {
                 _rtcEngine.LeaveChannel();
                 _rtcEngine.DisableVideoObserver();
+
+                // Important: clean up the engine as the last step
                 IRtcEngine.Destroy();
+                _rtcEngine = null;
             }
         }
 
