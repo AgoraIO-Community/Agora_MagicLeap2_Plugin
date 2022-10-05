@@ -6,6 +6,11 @@ using System;
 
 namespace agora_sample
 {
+    /// <summary>
+    /// The Custom Audio Capturer class uses Microphone audio source to
+    /// capture voice input through ML2Audio.  The audio buffer is pushed
+    /// constantly using the PushAudioFrame API in a thread. 
+    /// </summary>
     public class CustomAudioCapturer : MonoBehaviour
     {
         [SerializeField]
@@ -37,10 +42,10 @@ namespace agora_sample
 
         private void Awake()
         {
-            StartMicrophone();            
+            StartMicrophone();
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             int pos = Microphone.GetPosition(null);
             int diff = pos - lastSample;
@@ -54,6 +59,11 @@ namespace agora_sample
             lastSample = pos;
         }
 
+
+        private void OnDestroy()
+        {
+            StopAudioPush();
+        }
 
         // Find and configure audio input, called during Awake
         private void StartMicrophone()
@@ -172,7 +182,7 @@ namespace agora_sample
                 byteArr = BitConverter.GetBytes(shortData);
                 lock (_audioBuffer)
                 {
-                    if(_audioBuffer.Count <= _audioBuffer.Capacity - 2)
+                    if (_audioBuffer.Count <= _audioBuffer.Capacity - 2)
                     {
                         _audioBuffer.Put(byteArr[0]);
                         _audioBuffer.Put(byteArr[1]);

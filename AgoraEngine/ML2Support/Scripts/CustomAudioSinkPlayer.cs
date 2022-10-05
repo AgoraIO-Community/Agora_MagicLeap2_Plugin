@@ -7,6 +7,10 @@ using RingBuffer;
 
 namespace agora_sample
 {
+    /// <summary>
+    /// The Custom AudioSink Player class receives audio frames from the
+    /// Agora channel and applies the buffer to an AudioSource for playback.
+    /// </summary>
     public class CustomAudioSinkPlayer : MonoBehaviour
     {
         private IRtcEngine mRtcEngine = null;
@@ -122,7 +126,7 @@ namespace agora_sample
         }
 
 
-        void OnApplicationQuit()
+        void OnDestroy()
         {
             Debug.Log("OnApplicationQuit");
             _pullAudioFrameThreadSignal = false;
@@ -132,10 +136,6 @@ namespace agora_sample
                 Debug.LogWarning("cleanning up IntPtr buffer");
                 Marshal.FreeHGlobal(BufferPtr);
                 BufferPtr = IntPtr.Zero;
-            }
-            if (mRtcEngine != null)
-            {
-                IRtcEngine.Destroy();
             }
         }
 
