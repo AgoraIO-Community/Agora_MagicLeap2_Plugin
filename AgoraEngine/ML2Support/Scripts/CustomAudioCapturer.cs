@@ -1,6 +1,6 @@
 using System.Threading;
 using UnityEngine;
-using agora_gaming_rtc;
+using Agora.Rtc;
 using RingBuffer;
 using System;
 
@@ -111,17 +111,18 @@ namespace agora_sample
 
         void PushAudioFrameThread()
         {
-            var bytesPerSample = 2;
+            var bytesPerSample = BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE;
             var type = AUDIO_FRAME_TYPE.FRAME_TYPE_PCM16;
             var channels = CHANNEL;
             var samples = SAMPLE_RATE / PUSH_FREQ_PER_SEC;
             var samplesPerSec = SAMPLE_RATE;
-            var buffer = new byte[samples * bytesPerSample * CHANNEL];
+            var bufferLength = samples * (int)bytesPerSample * CHANNEL;
+            var buffer = new byte[bufferLength];
             var freq = 1000 / PUSH_FREQ_PER_SEC;
 
             var tic = new TimeSpan(DateTime.Now.Ticks);
 
-            mRtcEngine = IRtcEngine.QueryEngine();
+            mRtcEngine = RtcEngine.Instance;
 
             while (_pushAudioFrameThreadSignal)
             {
@@ -140,9 +141,9 @@ namespace agora_sample
                     {
                         lock (_audioBuffer)
                         {
-                            if (_audioBuffer.Size > samples * bytesPerSample * CHANNEL)
+                            if (_audioBuffer.Size > bufferLength)
                             {
-                                for (var j = 0; j < samples * bytesPerSample * CHANNEL; j++)
+                                for (var j = 0; j < bufferLength; j++)
                                 {
                                     buffer[j] = _audioBuffer.Get();
                                 }
@@ -151,14 +152,14 @@ namespace agora_sample
                                 {
                                     bytesPerSample = bytesPerSample,
                                     type = type,
-                                    samples = samples,
+                                    samplesPerChannel = samples / CHANNEL,
                                     samplesPerSec = samplesPerSec,
                                     channels = channels,
-                                    buffer = buffer,
+                                    RawBuffer = buffer,
                                     renderTimeMs = freq
                                 };
 
-                                mRtcEngine.PushAudioFrame(audioFrame);
+                                mRtcEngine.PushAudioFrame(MEDIA_SOURCE_TYPE.AUDIO_RECORDING_SOURCE, audioFrame);
                             }
                         }
                     }

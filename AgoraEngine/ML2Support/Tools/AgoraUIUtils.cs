@@ -1,5 +1,5 @@
 using UnityEngine;
-namespace agora_utilities
+namespace Agora.Util
 {
     public class AgoraUIUtils
     {

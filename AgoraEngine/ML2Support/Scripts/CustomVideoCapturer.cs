@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 
-using agora_gaming_rtc;
+using Agora.Rtc;
 
 public class CustomVideoCapturer : MonoBehaviour
 {
@@ -50,7 +50,7 @@ public class CustomVideoCapturer : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
             // Main logic controller should initialize the RTCEngine with AppID
-            _rtcEngine = IRtcEngine.QueryEngine();
+            _rtcEngine = RtcEngine.Instance;
         }
     }
 
@@ -254,7 +254,7 @@ public class CustomVideoCapturer : MonoBehaviour
         }
         _rtcEngine.SetVideoEncoderConfiguration(new VideoEncoderConfiguration
         {
-            frameRate = frame_rate,
+            frameRate = (int)frame_rate,
             bitrate = BitRate,
             dimensions = new VideoDimensions { width = width, height = height }
         });
@@ -350,9 +350,8 @@ public class CustomVideoCapturer : MonoBehaviour
             //Create a new external video frame
             ExternalVideoFrame externalVideoFrame = new ExternalVideoFrame();
             //Set the buffer type of the video frame
-            externalVideoFrame.type = ExternalVideoFrame.VIDEO_BUFFER_TYPE.VIDEO_BUFFER_RAW_DATA;
-            // Set the video pixel format
-            externalVideoFrame.format = ExternalVideoFrame.VIDEO_PIXEL_FORMAT.VIDEO_PIXEL_RGBA;
+            externalVideoFrame.type = VIDEO_BUFFER_TYPE.VIDEO_BUFFER_RAW_DATA;
+            externalVideoFrame.format = VIDEO_PIXEL_FORMAT.VIDEO_PIXEL_RGBA;
             externalVideoFrame.buffer = bytes;
             //Set the width of the video frame (in pixels)
             externalVideoFrame.stride = width;

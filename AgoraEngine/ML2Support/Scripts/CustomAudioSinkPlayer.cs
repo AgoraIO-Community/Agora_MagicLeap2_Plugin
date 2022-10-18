@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
-using agora_gaming_rtc;
+using Agora.Rtc;
 using RingBuffer;
 
 namespace agora_sample
@@ -14,14 +14,11 @@ namespace agora_sample
     public class CustomAudioSinkPlayer : MonoBehaviour
     {
         private IRtcEngine mRtcEngine = null;
-        private IAudioRawDataManager _audioRawDataManager;
 
         public int CHANNEL = 1;
         public int SAMPLE_RATE = 44100;
         public int PULL_FREQ_PER_SEC = 100;
         public bool DebugFlag = false;
-
-        const int BYTES_PER_SAMPLE = 2;
 
         int SAMPLES;
         int FREQ;
@@ -44,7 +41,7 @@ namespace agora_sample
         {
             SAMPLES = SAMPLE_RATE / PULL_FREQ_PER_SEC * CHANNEL;
             FREQ = 1000 / PULL_FREQ_PER_SEC;
-            BUFFER_SIZE = SAMPLES * BYTES_PER_SAMPLE;
+            BUFFER_SIZE = SAMPLES * (int)BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE;
 
             StartCoroutine(CoStartRunning());
         }
@@ -54,7 +51,7 @@ namespace agora_sample
             while (mRtcEngine == null)
             {
                 yield return new WaitForFixedUpdate();
-                mRtcEngine = IRtcEngine.QueryEngine();
+                mRtcEngine = RtcEngine.Instance;
             }
 
             var aud = GetComponent<AudioSource>();
@@ -71,8 +68,6 @@ namespace agora_sample
 
             // allow overflow to prevent edge case 
             audioBuffer = new RingBuffer<float>(bufferLength, overflow: true);
-
-            _audioRawDataManager = AudioRawDataManager.GetInstance(mRtcEngine);
 
             // Create and start the AudioClip playback, OnAudioRead will feed it
             _audioClip = AudioClip.Create(clipName,
@@ -141,12 +136,28 @@ namespace agora_sample
 
         private void PullAudioFrameThread()
         {
-            BufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
+            var avsync_type = 0;
+            var bytesPerSample = 2;
+            var type = AUDIO_FRAME_TYPE.FRAME_TYPE_PCM16;
+            var channels = CHANNEL;
+            var samples = SAMPLE_RATE / PULL_FREQ_PER_SEC * CHANNEL;
+            var samplesPerSec = SAMPLE_RATE;
+            var buffer = new byte[samples * bytesPerSample];
+            // var freq = 1000 / PULL_FREQ_PER_SEC;
+
+            // BufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
 
             var tic = new TimeSpan(DateTime.Now.Ticks);
 
             var byteArray = new byte[BUFFER_SIZE];
             long pullCount = 0;
+
+
+            AudioFrame audioFrame = new AudioFrame(
+             type, samples, BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE, channels, samplesPerSec, buffer, 0, avsync_type);
+            BufferPtr = Marshal.AllocHGlobal(samples * bytesPerSample * channels);
+            audioFrame.buffer = (UInt64)BufferPtr;
+            audioFrame.bufferPtr = BufferPtr;
 
             while (_pullAudioFrameThreadSignal)
             {
@@ -154,14 +165,7 @@ namespace agora_sample
                 if (toc.Subtract(tic).Duration().Milliseconds >= FREQ)
                 {
                     tic = new TimeSpan(DateTime.Now.Ticks);
-                    int rc = _audioRawDataManager.PullAudioFrame(BufferPtr,
-                        type: (int)AUDIO_FRAME_TYPE.FRAME_TYPE_PCM16,
-                     samples: SAMPLES,
-              bytesPerSample: 2,
-                    channels: CHANNEL,
-               samplesPerSec: SAMPLE_RATE,
-                renderTimeMs: 0,
-                 avsync_type: 0);
+                    int rc = mRtcEngine.PullAudioFrame(audioFrame);
 
                     if (rc < 0)
                     {
@@ -173,7 +177,7 @@ namespace agora_sample
                         continue;
                     }
 
-                    Marshal.Copy(BufferPtr, byteArray, 0, BUFFER_SIZE);
+                    Marshal.Copy(audioFrame.bufferPtr, byteArray, 0, BUFFER_SIZE);
 
                     var floatArray = ConvertByteToFloat16(byteArray);
                     lock (audioBuffer)

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using agora_gaming_rtc;
-using agora_utilities;
+using Agora.Rtc;
+using Agora.Util;
 
 namespace agora_sample
 {
@@ -25,6 +25,9 @@ namespace agora_sample
         [SerializeField]
         private string CHANNEL_NAME = "YOUR_CHANNEL_NAME";
 
+        [SerializeField]
+        CLIENT_ROLE_TYPE CLIENT_ROLE = CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER;
+
         [Header("UI Manager")]
         [SerializeField] GameObject SpawnPoint;
         [SerializeField] Text logText;
@@ -44,7 +47,7 @@ namespace agora_sample
         [SerializeField]
         CustomAudioCapturer CustomAudioCapture;
 
-        private agora_utilities.Logger _logger;
+        internal agora_utilities.Logger _logger;
         private IRtcEngine _rtcEngine = null;
         private uint _clientUID = 0;  // used for join channel, default is 0
 
@@ -57,7 +60,7 @@ namespace agora_sample
             if (appReady)
             {
                 InitUI();
-                VideoRenderMgr = new VideoRenderManager(SpawnPoint.transform, ReferenceTransform);
+                VideoRenderMgr = new VideoRenderManager(CHANNEL_NAME, SpawnPoint.transform, ReferenceTransform);
             }
         }
 
@@ -85,15 +88,29 @@ namespace agora_sample
         // Initialize Agora Game Engine
         void InitEngine(System.Action callback)
         {
-            _rtcEngine = IRtcEngine.GetEngine(APP_ID);
+
+            _rtcEngine = RtcEngine.CreateAgoraRtcEngine();
+            UserEventHandler handler = new UserEventHandler(this);
+            RtcEngineContext context = new RtcEngineContext(
+                appId: APP_ID,
+                context: 0,
+                channelProfile: CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING,
+                audioScenario: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_DEFAULT,
+                areaCode: AREA_CODE.AREA_CODE_GLOB
+                );
+            _rtcEngine.Initialize(context);
+            _rtcEngine.InitEventHandler(handler);
+
             _rtcEngine.SetLogFile("log.txt");
-            _rtcEngine.SetExternalAudioSource(true, CustomAudioCapturer.SAMPLE_RATE, CustomAudioCapturer.CHANNEL);
-            _rtcEngine.SetChannelProfile(CHANNEL_PROFILE.CHANNEL_PROFILE_LIVE_BROADCASTING);
+
+            _rtcEngine.SetExternalAudioSource(true, CustomAudioCapturer.SAMPLE_RATE, CustomAudioCapturer.CHANNEL, 1);
             _rtcEngine.SetClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
             _rtcEngine.SetAudioProfile(AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT, AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING);
             _rtcEngine.EnableVideo();
-            _rtcEngine.EnableVideoObserver();
-            _rtcEngine.SetExternalVideoSource(true);
+
+            // Agora does not have direct access to ML2 camera, so enable external source for input 
+            var ret = _rtcEngine.SetExternalVideoSource(true, false, EXTERNAL_VIDEO_SOURCE_TYPE.VIDEO_FRAME, new SenderOptions());
+            this._logger.UpdateLog("SetExternalVideoSource returns:" + ret);
 
             _rtcEngine.SetDefaultAudioRouteToSpeakerphone(true);
 
@@ -105,21 +122,13 @@ namespace agora_sample
             }
 
 
-            // Register event handlers
-            _rtcEngine.OnJoinChannelSuccess += OnJoinChannelSuccessHandler;
-            _rtcEngine.OnLeaveChannel += OnLeaveChannelHandler;
-            _rtcEngine.OnWarning += OnSDKWarningHandler;
-            _rtcEngine.OnError += OnSDKErrorHandler;
-            _rtcEngine.OnConnectionLost += OnConnectionLostHandler;
-            _rtcEngine.OnUserJoined += OnUserJoinedHandler;
-            _rtcEngine.OnUserOffline += OnUserOfflineHandler;
-            _rtcEngine.OnVideoSizeChanged += OnVideoSizeChanged;
-
-
             // If AppID is certifcate enabled, use token.
             if (UseToken)
             {
-                TokenClient.Instance?.GetTokens(CHANNEL_NAME, _clientUID, (token, _) =>
+                TokenClient.Instance.SetClient(
+          CLIENT_ROLE == CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER ? ClientType.publisher : ClientType.subscriber);
+
+                TokenClient.Instance.GetRtcToken(CHANNEL_NAME, _clientUID, (token) =>
                 {
                     TOKEN = token;
                     Debug.Log("Gotten token:" + token);
@@ -159,59 +168,15 @@ namespace agora_sample
 
         void JoinChannel()
         {
-            _rtcEngine.JoinChannelByKey(TOKEN, CHANNEL_NAME, "", _clientUID);
+            _rtcEngine.JoinChannel(TOKEN, CHANNEL_NAME, "", _clientUID);
         }
 
-        #region -- Agora Event Callbacks --
-        void OnJoinChannelSuccessHandler(string channelName, uint uid, int elapsed)
-        {
-            _logger.UpdateLog(string.Format("sdk version: {0}", IRtcEngine.GetSdkVersion()));
-            _logger.UpdateLog(string.Format("onJoinChannelSuccess channelName: {0}, uid: {1}, elapsed: {2}", channelName,
-                uid, elapsed));
-
-            // Start pushing audio data
-            CustomAudioCapture.StartPushAudioFrame();
-        }
-
-        void OnLeaveChannelHandler(RtcStats stats)
-        {
-            _logger.UpdateLog("OnLeaveChannelSuccess");
-            CustomAudioCapture.StopAudioPush();
-        }
-
-        void OnUserJoinedHandler(uint uid, int elapsed)
-        {
-            _logger.UpdateLog(string.Format("OnUserJoined uid: {0} elapsed: {1}", uid, elapsed));
-            VideoRenderMgr.MakeVideoView(uid);
-        }
-
-        void OnUserOfflineHandler(uint uid, USER_OFFLINE_REASON reason)
-        {
-            _logger.UpdateLog(string.Format("OnUserOffLine uid: {0}, reason: {1}", uid, (int)reason));
-            VideoRenderMgr.DestroyVideoView(uid);
-        }
-
-        void OnSDKWarningHandler(int warn, string msg)
-        {
-            _logger.UpdateLog(string.Format("OnSDKWarning warn: {0}, msg: {1}", warn, IRtcEngine.GetErrorDescription(warn)));
-        }
-
-        void OnSDKErrorHandler(int error, string msg)
-        {
-            _logger.UpdateLog(string.Format("OnSDKError error: {0}, msg: {1}", error, IRtcEngine.GetErrorDescription(error)));
-        }
-
-        void OnConnectionLostHandler()
-        {
-            _logger.UpdateLog(string.Format("OnConnectionLost "));
-        }
 
         void OnVideoSizeChanged(uint uid, int width, int height, int rotation)
         {
             VideoRenderMgr.UpdateVideoView(uid, width, height, rotation);
         }
 
-        #endregion
 
         private void OnDestroy()
         {
@@ -219,13 +184,85 @@ namespace agora_sample
             if (_rtcEngine != null)
             {
                 _rtcEngine.LeaveChannel();
-                _rtcEngine.DisableVideoObserver();
 
                 // Important: clean up the engine as the last step
-                IRtcEngine.Destroy();
+                _rtcEngine.Dispose();
                 _rtcEngine = null;
             }
         }
 
+
+        internal class UserEventHandler : IRtcEngineEventHandler
+        {
+            private readonly AgoraController _app;
+
+            internal UserEventHandler(AgoraController helloVideoTokenAgora)
+            {
+                _app = helloVideoTokenAgora;
+            }
+
+            #region -- Agora Event Callbacks --
+            public override void OnError(int err, string msg)
+            {
+                _app._logger.UpdateLog(string.Format("OnError err: {0}, msg: {1}", err, msg));
+            }
+
+            public override void OnJoinChannelSuccess(RtcConnection connection, int elapsed)
+            {
+                int build = 0;
+                _app._logger.UpdateLog(string.Format("sdk version: ${0}",
+                    _app._rtcEngine.GetVersion(ref build)));
+                _app._logger.UpdateLog(string.Format("OnJoinChannelSuccess channelName: {0}, uid: {1}, elapsed: {2}",
+                        connection.channelId, connection.localUid, elapsed));
+                _app.CustomAudioCapture?.StartPushAudioFrame();
+            }
+
+            public override void OnRejoinChannelSuccess(RtcConnection connection, int elapsed)
+            {
+                _app._logger.UpdateLog("OnRejoinChannelSuccess");
+            }
+
+            public override void OnLeaveChannel(RtcConnection connection, RtcStats stats)
+            {
+                _app._logger.UpdateLog("OnLeaveChannel");
+                _app.CustomAudioCapture.StopAudioPush();
+            }
+
+            public override void OnClientRoleChanged(RtcConnection connection, CLIENT_ROLE_TYPE oldRole,
+                CLIENT_ROLE_TYPE newRole)
+            {
+                _app._logger.UpdateLog("OnClientRoleChanged");
+                TokenClient.Instance.OnClientRoleChangedHandler(oldRole, newRole);
+            }
+
+            public override void OnUserJoined(RtcConnection connection, uint uid, int elapsed)
+            {
+                _app._logger.UpdateLog(string.Format("OnUserJoined uid: {0} elapsed: {1}", uid, elapsed));
+                _app.VideoRenderMgr.MakeVideoView(uid);
+            }
+
+            public override void OnUserOffline(RtcConnection connection, uint uid, USER_OFFLINE_REASON_TYPE reason)
+            {
+                _app._logger.UpdateLog(string.Format("OnUserOffLine uid: {0}, reason: {1}", uid, (int)reason));
+                _app.VideoRenderMgr.DestroyVideoView(uid);
+            }
+
+            public override void OnVideoSizeChanged(RtcConnection connection, VIDEO_SOURCE_TYPE sourceType, uint uid, int width, int height, int rotation)
+            {
+                _app.VideoRenderMgr.UpdateVideoView(uid, width, height, rotation);
+            }
+
+            public override void OnTokenPrivilegeWillExpire(RtcConnection connection, string token)
+            {
+                base.OnTokenPrivilegeWillExpire(connection, token);
+                TokenClient.Instance.OnTokenPrivilegeWillExpireHandler(token);
+            }
+
+            public override void OnConnectionLost(RtcConnection connection)
+            {
+                _app._logger.UpdateLog(string.Format("OnConnectionLost "));
+            }
+            #endregion
+        }
     }
 }

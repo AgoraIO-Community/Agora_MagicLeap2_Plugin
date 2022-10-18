@@ -34,7 +34,7 @@ Transform:
   - {fileID: 9118921474007055951}
   - {fileID: 3040584489502813668}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2277068096631128598
 MonoBehaviour:
@@ -51,6 +51,7 @@ MonoBehaviour:
   APP_ID: 
   UseToken: 0
   CHANNEL_NAME: ml2test
+  CLIENT_ROLE: 1
   SpawnPoint: {fileID: 0}
   logText: {fileID: 0}
   ReferenceTransform: {fileID: 0}
@@ -436,9 +437,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8402866730383717436}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acf6806603dac4540b342bc5626f300d, type: 3}
+  m_Script: {fileID: 11500000, guid: 987deca9575e246f4b9c9ad85088368b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   clientType: 0
-  serverURL: http://localhost:8080
+  serverURL: 
   ExpirationSecs: 3600

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using agora_gaming_rtc;
-using agora_utilities;
+using Agora.Rtc;
+using Agora.Util;
 
 namespace agora_sample
 {
@@ -18,9 +18,11 @@ namespace agora_sample
 
         Transform SpawnPoint { get; set; }
         Transform ReferenceTransform { get; set; }
+        string ChannelName = "";
 
-        public VideoRenderManager(Transform spawnPoint, Transform referenceTransform)
+        public VideoRenderManager(string channelName, Transform spawnPoint, Transform referenceTransform)
         {
+            ChannelName = channelName;
             SpawnPoint = spawnPoint;
             ReferenceTransform = referenceTransform;
         }
@@ -38,9 +40,16 @@ namespace agora_sample
             if (videoSurface != null)
             {
                 // configure videoSurface
-                videoSurface.SetForUser(uid);
+                if (uid == 0)
+                {
+                    videoSurface.SetForUser(uid);
+                }
+                else
+                {
+                    videoSurface.SetForUser(uid, ChannelName, VIDEO_SOURCE_TYPE.VIDEO_SOURCE_REMOTE);
+                }
+
                 videoSurface.SetEnable(true);
-                videoSurface.SetVideoSurfaceType(AgoraVideoSurfaceType.RawImage);
                 UserVideoDict[uid] = videoSurface;
             }
         }
@@ -126,6 +135,12 @@ namespace agora_sample
             go.transform.localScale = Vector3.one;
             // configure videoSurface
             VideoSurface videoSurface = go.AddComponent<VideoSurface>();
+            //videoSurface.OnTextureSizeModify += (int width, int height) =>
+            //{
+            //    float scale = (float)height / (float)width;
+            //    videoSurface.transform.localScale = new Vector3(-5, 5 * scale, 1);
+            //};
+
             return videoSurface;
         }
 
