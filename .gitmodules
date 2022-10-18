@@ -1,0 +1,3 @@
+[submodule "AgoraEngine/Prefabs/TokenClient"]
+	path = AgoraEngine/Prefabs/TokenClient
+	url = git@github.com:AgoraIO-Community/UnityTokenPrefab.git
