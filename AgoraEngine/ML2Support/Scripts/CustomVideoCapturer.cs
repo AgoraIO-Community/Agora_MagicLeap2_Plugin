@@ -93,7 +93,7 @@ public class CustomVideoCapturer : MonoBehaviour
         if (!MLPermissions.CheckPermission(MLPermission.Camera).IsOk)
         {
             Debug.LogError("Permission not ok");
-            MLPluginLog.Warning("ML camera permission is not ok");
+            //MLPluginLog.Warning("ML camera permission is not ok");
             return;
         }
 
@@ -118,7 +118,7 @@ public class CustomVideoCapturer : MonoBehaviour
         }
 
         Debug.Log("Camera device available");
-        MLPluginLog.Warning("camera device available. connecting camera...");
+        //   MLPluginLog.Warning("camera device available. connecting camera...");
 
         yield return new WaitForSeconds(2f);
     }
@@ -327,11 +327,8 @@ public class CustomVideoCapturer : MonoBehaviour
     /// </summary>
     /// <param name="capturedFrame">Captured Frame.</param>
     /// <param name="resultExtras">Result Extra.</param>
-    private void OnCaptureRawVideoFrameAvailable(MLCamera.CameraOutput capturedFrame,
-                                                 MLCamera.ResultExtras resultExtras)
+    private void OnCaptureRawVideoFrameAvailable(MLCamera.CameraOutput capturedFrame, MLCamera.ResultExtras resultExtras, MLCamera.Metadata metadataHandle)
     {
-        // cameraCaptureVisualizer.OnCaptureDataReceived(resultExtras, capturedFrame);
-        // Debug.Log("RawVideoFrameAvailable:" + capturedFrame.ToString());
         var plane = capturedFrame.Planes[0];
         byte[] data = plane.Data;
         ShareScreen(data, (int)(plane.Stride / plane.PixelStride), (int)plane.Height);

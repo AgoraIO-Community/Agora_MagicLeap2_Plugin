@@ -1163,6 +1163,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1359980009267695964, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1359980009267695964, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5355557165450182212, guid: 6906f74934047d24e9a47bbdd1afb57a,
         type: 3}
       propertyPath: m_SizeDelta.y
@@ -1937,6 +1947,11 @@ PrefabInstance:
       objectReference: {fileID: 985624462}
     - target: {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
+      propertyPath: UseToken
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
       propertyPath: SpawnPoint
       value: 
       objectReference: {fileID: 88421317}
@@ -2019,6 +2034,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: AgoraController
+      objectReference: {fileID: 0}
+    - target: {fileID: 8537417665594558118, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: MLQuality
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -3,6 +3,7 @@ using UnityEngine;
 using agora_gaming_rtc;
 using RingBuffer;
 using System;
+using UnityEngine.XR.MagicLeap;
 
 namespace agora_sample
 {
@@ -17,7 +18,7 @@ namespace agora_sample
         private AudioSource InputAudioSource = null;
 
         // Audio stuff
-        public static int CHANNEL = 2;
+        public static int CHANNEL = 1;
         public const int
             SAMPLE_RATE = 48000; // Please do not change this value because Unity re-samples the sample rate to 48000.
 
@@ -32,33 +33,17 @@ namespace agora_sample
         private int _count;
 
         private bool _startSignal = false;
-        private string _deviceMicrophone;
 
         const int AUDIO_CLIP_LENGTH_SECONDS = 60;
 
-        int lastSample = 0;
-
         IRtcEngine mRtcEngine;
+
+        private ML2BufferClip mlAudioBufferClip;
 
         private void Awake()
         {
             StartMicrophone();
         }
-
-        private void FixedUpdate()
-        {
-            int pos = Microphone.GetPosition(null);
-            int diff = pos - lastSample;
-
-            if (diff > 0)
-            {
-                float[] samples = new float[diff * InputAudioSource.clip.channels];
-                InputAudioSource.clip.GetData(samples, lastSample);
-                HandleAudioBuffer(samples, InputAudioSource.clip.channels);
-            }
-            lastSample = pos;
-        }
-
 
         private void OnDestroy()
         {
@@ -68,29 +53,14 @@ namespace agora_sample
         // Find and configure audio input, called during Awake
         private void StartMicrophone()
         {
-            if (InputAudioSource == null)
+            var captureType = MLAudioInput.MicCaptureType.VoiceCapture;
+            if (!MLPermissions.CheckPermission(MLPermission.RecordAudio).IsOk)
             {
-                InputAudioSource = GetComponent<AudioSource>();
-            }
-
-            // Use the first detected Microphone device.
-            if (Microphone.devices.Length > 0)
-            {
-                _deviceMicrophone = Microphone.devices[0];
-            }
-
-            // If no microphone is detected, exit early and log the error.
-            if (string.IsNullOrEmpty(_deviceMicrophone))
-            {
-                Debug.LogError("Error: HelloVideoAgora.deviceMicrophone could not find a microphone device, disabling script.");
-                enabled = false;
+                Debug.LogError($"AudioCaptureExample.StartMicrophone() cannot start, {MLPermission.RecordAudio} not granted.");
                 return;
             }
-
-            InputAudioSource.loop = true;
-            InputAudioSource.clip = Microphone.Start(_deviceMicrophone, true, AUDIO_CLIP_LENGTH_SECONDS, SAMPLE_RATE);
-            CHANNEL = InputAudioSource.clip.channels;
-            Debug.Log("StartMicrophone channels = " + CHANNEL);
+            mlAudioBufferClip = new ML2BufferClip(MLAudioInput.MicCaptureType.VoiceCapture, AUDIO_CLIP_LENGTH_SECONDS, MLAudioInput.GetSampleRate(captureType));
+            mlAudioBufferClip.OnReceiveSampleCallback += HandleAudioBuffer;
         }
 
         public void StartPushAudioFrame()
@@ -167,7 +137,7 @@ namespace agora_sample
         }
 
 
-        private void HandleAudioBuffer(float[] data, int channels)
+        private void HandleAudioBuffer(float[] data)
         {
             if (!_startConvertSignal) return;
 
@@ -192,6 +162,28 @@ namespace agora_sample
 
             _count += 1;
             if (_count == 20) _startSignal = true;
+        }
+    }
+
+    /// <summary>
+    ///   Extending BufferClip class for callback function
+    /// </summary>
+    public class ML2BufferClip : MLAudioInput.BufferClip
+    {
+        public ML2BufferClip(MLAudioInput.MicCaptureType captureType, int lengthSec, int frequency) : this(captureType, (uint)lengthSec, (uint)frequency, (uint)MLAudioInput.GetChannels(captureType)) { }
+
+        public ML2BufferClip(MLAudioInput.MicCaptureType captureType, uint samplesLengthInSeconds, uint sampleRate, uint channels)
+            : base(captureType, samplesLengthInSeconds, sampleRate, channels) { }
+
+        public event Action<float[]> OnReceiveSampleCallback;
+
+        protected override void OnReceiveSamples(float[] samples)
+        {
+            base.OnReceiveSamples(samples);
+            if (OnReceiveSampleCallback != null)
+            {
+                OnReceiveSampleCallback(samples);
+            }
         }
     }
 }
