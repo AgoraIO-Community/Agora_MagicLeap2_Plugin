@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 
 using Agora.Rtc;
+using static UnityEngine.XR.MagicLeap.MLCamera;
 
 public class CustomVideoCapturer : MonoBehaviour
 {
@@ -328,7 +329,7 @@ public class CustomVideoCapturer : MonoBehaviour
     /// <param name="capturedFrame">Captured Frame.</param>
     /// <param name="resultExtras">Result Extra.</param>
     private void OnCaptureRawVideoFrameAvailable(MLCamera.CameraOutput capturedFrame,
-                                                 MLCamera.ResultExtras resultExtras)
+                                                 MLCamera.ResultExtras resultExtras, MLCamera.Metadata metadata)
     {
         // cameraCaptureVisualizer.OnCaptureDataReceived(resultExtras, capturedFrame);
         // Debug.Log("RawVideoFrameAvailable:" + capturedFrame.ToString());

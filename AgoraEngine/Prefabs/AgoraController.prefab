@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2277068096631128599}
-  - component: {fileID: 2277068096631128598}
+  - component: {fileID: 8615111217482490128}
   m_Layer: 0
   m_Name: AgoraController
   m_TagString: Untagged
@@ -36,7 +36,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2277068096631128598
+--- !u!114 &8615111217482490128
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -48,9 +48,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 496dcca0763834c9ca7913edacec606a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  APP_ID: 
+  APP_ID: 00e97fd319264c1ea2be69a370bd712e
   UseToken: 0
-  CHANNEL_NAME: ml2test
+  CHANNEL_NAME: unity3d
   CLIENT_ROLE: 1
   SpawnPoint: {fileID: 0}
   logText: {fileID: 0}

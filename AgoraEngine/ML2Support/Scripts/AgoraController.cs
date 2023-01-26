@@ -228,8 +228,7 @@ namespace agora_sample
                 _app.CustomAudioCapture.StopAudioPush();
             }
 
-            public override void OnClientRoleChanged(RtcConnection connection, CLIENT_ROLE_TYPE oldRole,
-                CLIENT_ROLE_TYPE newRole)
+            public override void OnClientRoleChanged(RtcConnection connection, CLIENT_ROLE_TYPE oldRole, CLIENT_ROLE_TYPE newRole, ClientRoleOptions newRoleOptions)
             {
                 _app._logger.UpdateLog("OnClientRoleChanged");
                 TokenClient.Instance.OnClientRoleChangedHandler(oldRole, newRole);

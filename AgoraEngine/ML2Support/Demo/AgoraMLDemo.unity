@@ -2020,7 +2020,48 @@ PrefabInstance:
       propertyPath: m_Name
       value: AgoraController
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: APP_ID
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: logText
+      value: 
+      objectReference: {fileID: 985624462}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: SpawnPoint
+      value: 
+      objectReference: {fileID: 88421317}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: CHANNEL_NAME
+      value: ml2test
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: ConnectButton
+      value: 
+      objectReference: {fileID: 1598720281}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: MuteLocalButton
+      value: 
+      objectReference: {fileID: 273147032}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: MuteRemoteButton
+      value: 
+      objectReference: {fileID: 2033698802}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: ReferenceTransform
+      value: 
+      objectReference: {fileID: 1118466283}
+    m_RemovedComponents:
+    - {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

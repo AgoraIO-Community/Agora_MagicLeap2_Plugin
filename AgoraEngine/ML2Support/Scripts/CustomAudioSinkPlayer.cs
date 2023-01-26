@@ -156,8 +156,7 @@ namespace agora_sample
             AudioFrame audioFrame = new AudioFrame(
              type, samples, BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE, channels, samplesPerSec, buffer, 0, avsync_type);
             BufferPtr = Marshal.AllocHGlobal(samples * bytesPerSample * channels);
-            audioFrame.buffer = (UInt64)BufferPtr;
-            audioFrame.bufferPtr = BufferPtr;
+            audioFrame.buffer = BufferPtr;
 
             while (_pullAudioFrameThreadSignal)
             {
@@ -177,7 +176,7 @@ namespace agora_sample
                         continue;
                     }
 
-                    Marshal.Copy(audioFrame.bufferPtr, byteArray, 0, BUFFER_SIZE);
+                    Marshal.Copy(audioFrame.buffer, byteArray, 0, BUFFER_SIZE);
 
                     var floatArray = ConvertByteToFloat16(byteArray);
                     lock (audioBuffer)
