@@ -15,23 +15,22 @@ namespace agora_sample
     /// </summary>
     public class CustomAudioCapturer : MonoBehaviour
     {
-        [SerializeField]
-        private AudioSource InputAudioSource = null;
-
         // Audio stuff
         public static int CHANNEL = 2;
         public const int
             SAMPLE_RATE = 48000; // Please do not change this value because Unity re-samples the sample rate to 48000.
 
         private const int RESCALE_FACTOR = 32767; // for short to byte conversion
-        private int PUSH_FREQ_PER_SEC = 10;
+        private const int PUSH_FREQ_PER_SEC = 10;
+        private const int SEND_INTERVAL = 1000 / PUSH_FREQ_PER_SEC;
 
         private RingBuffer<byte> _audioBuffer;
         private bool _startConvertSignal = false;
+        private bool _nextSendOK = true;
 
-        private Thread _pushAudioFrameThread;
         private bool _pushAudioFrameThreadSignal = false;
         private int _count;
+        private long tick;
 
         private ML2BufferClip mlAudioBufferClip;
 
@@ -39,6 +38,9 @@ namespace agora_sample
 
         IRtcEngine mRtcEngine;
         private System.Object _rtcLock = new System.Object();
+        double startMillisecond = 0;
+        AudioFrame _audioFrame;
+        int BufferLength { get; set; }
 
         private void Awake()
         {
@@ -58,6 +60,51 @@ namespace agora_sample
                 yield return new WaitForFixedUpdate();
                 mRtcEngine = RtcEngine.Instance;
             }
+
+            var bytesPerSample = (int)BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE;
+            var samples = SAMPLE_RATE / PUSH_FREQ_PER_SEC;
+            BufferLength = samples * bytesPerSample * CHANNEL;
+            _audioFrame = new AudioFrame
+            {
+                bytesPerSample = BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE,
+                type = AUDIO_FRAME_TYPE.FRAME_TYPE_PCM16,
+                samplesPerChannel = SAMPLE_RATE / PUSH_FREQ_PER_SEC,
+                samplesPerSec = SAMPLE_RATE,
+                channels = CHANNEL,
+                RawBuffer = new byte[BufferLength],
+                renderTimeMs = 1000 / PUSH_FREQ_PER_SEC
+            };
+            Debug.Log("BufferLength = " + BufferLength);
+        }
+
+        private void Update()
+        {
+            double nextMillisecond = startMillisecond + tick * SEND_INTERVAL;
+            double curMillisecond = GetTimestamp();
+            int sleepMillisecond = (int)Math.Ceiling(nextMillisecond - curMillisecond);
+            _nextSendOK = (sleepMillisecond <= 0);
+
+            if (_pushAudioFrameThreadSignal && mRtcEngine != null && _nextSendOK)
+            {
+                int nRet = -1;
+                lock (_audioBuffer)
+                {
+                    if (_audioBuffer.Size > BufferLength)
+                    {
+                        for (var j = 0; j < BufferLength; j++)
+                        {
+                            _audioFrame.RawBuffer[j] = _audioBuffer.Get();
+                        }
+                        nRet = mRtcEngine.PushAudioFrame(MEDIA_SOURCE_TYPE.AUDIO_PLAYOUT_SOURCE, _audioFrame);
+                        Debug.Log($"PushAudioFrame returns:{nRet} tick={tick} count={_count}");
+                        tick++;
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"_nextSendOK:{_nextSendOK} sleep={sleepMillisecond}");
+            }
         }
 
         // Find and configure audio input, called during Awake
@@ -75,19 +122,12 @@ namespace agora_sample
 
         public void StartPushAudioFrame()
         {
-            StartCoroutine(CoStartPushingAudio());
-        }
-
-        private IEnumerator CoStartPushingAudio()
-        {
-            yield return new WaitUntil(() => mRtcEngine != null);
+            tick = 0;
+            startMillisecond = GetTimestamp();
             var bufferLength = SAMPLE_RATE / PUSH_FREQ_PER_SEC * CHANNEL * 10000;
             _audioBuffer = new RingBuffer<byte>(bufferLength);
             _startConvertSignal = true;
-
             _pushAudioFrameThreadSignal = true;
-            _pushAudioFrameThread = new Thread(PushAudioFrameThread);
-            _pushAudioFrameThread.Start();
         }
 
         public void StopAudioPush()
@@ -101,25 +141,11 @@ namespace agora_sample
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return ts.TotalMilliseconds;
         }
+
         void PushAudioFrameThread()
         {
-            var bytesPerSample = (int)BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE;
-            var type = AUDIO_FRAME_TYPE.FRAME_TYPE_PCM16;
-            var channels = CHANNEL;
-            var samples = SAMPLE_RATE / PUSH_FREQ_PER_SEC;
-            var samplesPerSec = SAMPLE_RATE;
             var freq = 1000 / PUSH_FREQ_PER_SEC;
-
-            var audioFrame = new AudioFrame
-            {
-                bytesPerSample = BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE,
-                type = type,
-                samplesPerChannel = samples,
-                samplesPerSec = samplesPerSec,
-                channels = channels,
-                RawBuffer = new byte[samples * bytesPerSample * CHANNEL],
-                renderTimeMs = freq
-            };
+            var audioFrame = _audioFrame;
 
             double startMillisecond = GetTimestamp();
             long tick = 0;
@@ -130,16 +156,15 @@ namespace agora_sample
                 {
                     if (mRtcEngine == null)
                     {
-                        Debug.LogWarning("AGORA: PushAudioFrameThread, RTCEngine is null");
                         break;
                     }
 
                     int nRet = -1;
                     lock (_audioBuffer)
                     {
-                        if (_audioBuffer.Size > samples * bytesPerSample * CHANNEL)
+                        if (_audioBuffer.Size > BufferLength)
                         {
-                            for (var j = 0; j < samples * bytesPerSample * CHANNEL; j++)
+                            for (var j = 0; j < BufferLength; j++)
                             {
                                 audioFrame.RawBuffer[j] = _audioBuffer.Get();
                             }
@@ -189,11 +214,35 @@ namespace agora_sample
             }
 
             _count += 1;
-            if (_count % 100 == 0)
+            //if (_count % 100 == 0)
+            //{
+            //    Debug.Log($"AGORA: HandleAudioBuffer count:{_count}");
+            //}
+        }
+
+#if UNITY_EDITOR
+        private void OnAudioFilterRead(float[] data, int channels)
+        {
+            if (!_startConvertSignal) return;
+            var rescaleFactor = 32767;
+            lock (_audioBuffer)
             {
-                Debug.Log($"AGORA: HandleAudioBuffer count:{_count}");
+                foreach (var t in data)
+                {
+                    var sample = t;
+                    if (sample > 1) sample = 1;
+                    else if (sample < -1) sample = -1;
+
+                    var shortData = (short)(sample * rescaleFactor);
+                    var byteArr = new byte[2];
+                    byteArr = BitConverter.GetBytes(shortData);
+
+                    _audioBuffer.Put(byteArr[0]);
+                    _audioBuffer.Put(byteArr[1]);
+                }
             }
         }
+#endif
     }
 
 

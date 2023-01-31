@@ -334,7 +334,7 @@ public class CustomVideoCapturer : MonoBehaviour
         // cameraCaptureVisualizer.OnCaptureDataReceived(resultExtras, capturedFrame);
         // Debug.Log("RawVideoFrameAvailable:" + capturedFrame.ToString());
         var plane = capturedFrame.Planes[0];
-        byte[] data = plane.Data;
+        byte[] data = plane.Data.ToArray(); // a copy
         ShareScreen(data, (int)(plane.Stride / plane.PixelStride), (int)plane.Height);
     }
 
@@ -366,7 +366,7 @@ public class CustomVideoCapturer : MonoBehaviour
             _rtcEngine.PushVideoFrame(externalVideoFrame);
             if (timestamp % 100 == 0)
             {
-                Debug.Log("Pushed frame = " + timestamp);
+                Debug.Log("Pushed video frame = " + timestamp);
             }
 
         }

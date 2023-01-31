@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Agora.Rtc;
 using Agora.Util;
@@ -18,7 +19,7 @@ namespace agora_sample
 
         [SerializeField]
         [Tooltip("Use TokenClient to connect to a predefined token server. Unmark it if your AppID doesnot use token.")]
-        bool UseToken = false;
+        public bool UseToken = false;
 
         private string TOKEN = "";
 
@@ -98,12 +99,14 @@ namespace agora_sample
                 audioScenario: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_DEFAULT,
                 areaCode: AREA_CODE.AREA_CODE_GLOB
                 );
-            _rtcEngine.Initialize(context);
-            _rtcEngine.InitEventHandler(handler);
+            var rc = _rtcEngine.Initialize(context);
+            Debug.Assert(rc == 0, "rtcEngine init failed");
+            rc = _rtcEngine.InitEventHandler(handler);
+            Debug.Assert(rc == 0, "rtcEngine init handler failed");
 
             _rtcEngine.SetLogFile("log.txt");
 
-            _rtcEngine.SetExternalAudioSource(true, CustomAudioCapturer.SAMPLE_RATE, CustomAudioCapturer.CHANNEL, 1);
+            // _rtcEngine.SetExternalAudioSource(true, CustomAudioCapturer.SAMPLE_RATE, CustomAudioCapturer.CHANNEL, 1);
             _rtcEngine.SetClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
             _rtcEngine.SetAudioProfile(AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT, AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING);
             _rtcEngine.EnableVideo();
@@ -164,11 +167,31 @@ namespace agora_sample
             MuteRemoteButton.Setup(false, "Mute Remote", "UnMute Remote",
                 callOnAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(true); },
                 callOffAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(false); });
+
+            var mlInputs = new MagicLeapInputs();
+            mlInputs.Enable();
+            var controllerActions = new MagicLeapInputs.ControllerActions(mlInputs);
+
+            controllerActions.Bumper.performed += HandleOnBumperDown;
+            // controllerActions.Trigger.performed += HandleOnTriggerDown;
         }
 
         void JoinChannel()
         {
-            _rtcEngine.JoinChannel(TOKEN, CHANNEL_NAME, "", _clientUID);
+            //     _rtcEngine.JoinChannel(TOKEN, CHANNEL_NAME, "", _clientUID);
+
+            var option = new ChannelMediaOptions();
+            option.autoSubscribeVideo.SetValue(true);
+            option.autoSubscribeAudio.SetValue(true);
+            option.publishMicrophoneTrack.SetValue(false);
+            option.publishCameraTrack.SetValue(false);
+            option.publishCustomAudioTrack.SetValue(true);
+            option.publishCustomVideoTrack.SetValue(true);
+            option.publishEncodedVideoTrack.SetValue(false);
+            option.clientRoleType.SetValue(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
+            option.channelProfile.SetValue(CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING);
+
+            _rtcEngine.JoinChannel(TOKEN, CHANNEL_NAME, _clientUID, option);
         }
 
 
@@ -191,14 +214,25 @@ namespace agora_sample
             }
         }
 
+        private void HandleOnBumperDown(InputAction.CallbackContext inputCallback)
+        {
+            Debug.Log("(BUMPER) Connecting camera...");
+            CustomVideoCapture.ConnectCamera();
+        }
+
+        private void HandleOnTriggerDown(InputAction.CallbackContext inputCallback)
+        {
+            Debug.Log("(Trigger) Disconnecting camera...");
+            CustomVideoCapture.DisconnectCamera();
+        }
 
         internal class UserEventHandler : IRtcEngineEventHandler
         {
             private readonly AgoraController _app;
 
-            internal UserEventHandler(AgoraController helloVideoTokenAgora)
+            internal UserEventHandler(AgoraController agoraController)
             {
-                _app = helloVideoTokenAgora;
+                _app = agoraController;
             }
 
             #region -- Agora Event Callbacks --
@@ -225,7 +259,7 @@ namespace agora_sample
             public override void OnLeaveChannel(RtcConnection connection, RtcStats stats)
             {
                 _app._logger.UpdateLog("OnLeaveChannel");
-                _app.CustomAudioCapture.StopAudioPush();
+                _app.CustomAudioCapture?.StopAudioPush();
             }
 
             public override void OnClientRoleChanged(RtcConnection connection, CLIENT_ROLE_TYPE oldRole, CLIENT_ROLE_TYPE newRole, ClientRoleOptions newRoleOptions)
@@ -253,8 +287,11 @@ namespace agora_sample
 
             public override void OnTokenPrivilegeWillExpire(RtcConnection connection, string token)
             {
-                base.OnTokenPrivilegeWillExpire(connection, token);
-                TokenClient.Instance.OnTokenPrivilegeWillExpireHandler(token);
+                if (_app.UseToken)
+                {
+                    base.OnTokenPrivilegeWillExpire(connection, token);
+                    TokenClient.Instance.OnTokenPrivilegeWillExpireHandler(token);
+                }
             }
 
             public override void OnConnectionLost(RtcConnection connection)
