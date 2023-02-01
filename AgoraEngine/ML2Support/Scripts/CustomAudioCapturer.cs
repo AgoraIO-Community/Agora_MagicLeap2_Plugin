@@ -16,7 +16,7 @@ namespace agora_sample
     public class CustomAudioCapturer : MonoBehaviour
     {
         // Audio stuff
-        public static int CHANNEL = 2;
+        public static int CHANNEL = 1;
         public const int
             SAMPLE_RATE = 48000; // Please do not change this value because Unity re-samples the sample rate to 48000.
 
@@ -74,7 +74,7 @@ namespace agora_sample
                 RawBuffer = new byte[BufferLength],
                 renderTimeMs = 1000 / PUSH_FREQ_PER_SEC
             };
-            Debug.Log("BufferLength = " + BufferLength);
+            AgoraLog.Log("BufferLength = " + BufferLength);
         }
 
         private void Update()
@@ -96,15 +96,11 @@ namespace agora_sample
                             _audioFrame.RawBuffer[j] = _audioBuffer.Get();
                         }
                         nRet = mRtcEngine.PushAudioFrame(MEDIA_SOURCE_TYPE.AUDIO_PLAYOUT_SOURCE, _audioFrame);
-                        Debug.Log($"PushAudioFrame returns:{nRet} tick={tick} count={_count}");
                         tick++;
                     }
                 }
             }
-            else
-            {
-                Debug.LogWarning($"_nextSendOK:{_nextSendOK} sleep={sleepMillisecond}");
-            }
+
         }
 
         // Find and configure audio input, called during Awake
@@ -142,54 +138,6 @@ namespace agora_sample
             return ts.TotalMilliseconds;
         }
 
-        void PushAudioFrameThread()
-        {
-            var freq = 1000 / PUSH_FREQ_PER_SEC;
-            var audioFrame = _audioFrame;
-
-            double startMillisecond = GetTimestamp();
-            long tick = 0;
-            Debug.Log($"AGORA: PushAudioFrameThread started, timestamp:{startMillisecond}");
-            while (_pushAudioFrameThreadSignal)
-            {
-                lock (_rtcLock)
-                {
-                    if (mRtcEngine == null)
-                    {
-                        break;
-                    }
-
-                    int nRet = -1;
-                    lock (_audioBuffer)
-                    {
-                        if (_audioBuffer.Size > BufferLength)
-                        {
-                            for (var j = 0; j < BufferLength; j++)
-                            {
-                                audioFrame.RawBuffer[j] = _audioBuffer.Get();
-                            }
-                            nRet = mRtcEngine.PushAudioFrame(MEDIA_SOURCE_TYPE.AUDIO_PLAYOUT_SOURCE, audioFrame);
-                            Debug.Log($"PushAudioFrame returns:{nRet} tick={tick} count={_count}");
-                        }
-                    }
-
-                    if (nRet == 0)
-                    {
-                        tick++;
-                        double nextMillisecond = startMillisecond + tick * freq;
-                        double curMillisecond = GetTimestamp();
-                        int sleepMillisecond = (int)Math.Ceiling(nextMillisecond - curMillisecond);
-                        //Debug.Log("sleepMillisecond : " + sleepMillisecond);
-                        if (sleepMillisecond > 0)
-                        {
-                            Thread.Sleep(sleepMillisecond);
-                        }
-                    }
-                }
-            }
-        }
-
-
         private void HandleAudioBuffer(float[] data)
         {
             if (!_startConvertSignal) return;
@@ -219,33 +167,7 @@ namespace agora_sample
             //    Debug.Log($"AGORA: HandleAudioBuffer count:{_count}");
             //}
         }
-
-#if UNITY_EDITOR
-        private void OnAudioFilterRead(float[] data, int channels)
-        {
-            if (!_startConvertSignal) return;
-            var rescaleFactor = 32767;
-            lock (_audioBuffer)
-            {
-                foreach (var t in data)
-                {
-                    var sample = t;
-                    if (sample > 1) sample = 1;
-                    else if (sample < -1) sample = -1;
-
-                    var shortData = (short)(sample * rescaleFactor);
-                    var byteArr = new byte[2];
-                    byteArr = BitConverter.GetBytes(shortData);
-
-                    _audioBuffer.Put(byteArr[0]);
-                    _audioBuffer.Put(byteArr[1]);
-                }
-            }
-        }
-#endif
-    }
-
-
+    } /* end of CustomAudioCapturer class */
 
     /// <summary>
     ///   Extending BufferClip class for callback function

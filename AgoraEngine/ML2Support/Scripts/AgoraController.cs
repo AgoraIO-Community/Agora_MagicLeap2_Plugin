@@ -104,18 +104,18 @@ namespace agora_sample
             rc = _rtcEngine.InitEventHandler(handler);
             Debug.Assert(rc == 0, "rtcEngine init handler failed");
 
-            _rtcEngine.SetLogFile("log.txt");
+            _rtcEngine.EnableAudio();
+            _rtcEngine.SetExternalAudioSource(true, CustomAudioCapturer.SAMPLE_RATE, CustomAudioCapturer.CHANNEL, 1);
 
-            // _rtcEngine.SetExternalAudioSource(true, CustomAudioCapturer.SAMPLE_RATE, CustomAudioCapturer.CHANNEL, 1);
             _rtcEngine.SetClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
             _rtcEngine.SetAudioProfile(AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT, AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING);
-            _rtcEngine.EnableVideo();
 
+            _rtcEngine.EnableVideo();
             // Agora does not have direct access to ML2 camera, so enable external source for input 
             var ret = _rtcEngine.SetExternalVideoSource(true, false, EXTERNAL_VIDEO_SOURCE_TYPE.VIDEO_FRAME, new SenderOptions());
             this._logger.UpdateLog("SetExternalVideoSource returns:" + ret);
 
-            _rtcEngine.SetDefaultAudioRouteToSpeakerphone(true);
+            // _rtcEngine.SetDefaultAudioRouteToSpeakerphone(true);
 
             // use external audio sink
             if (CustomAudioSink != null)
@@ -187,7 +187,6 @@ namespace agora_sample
             option.publishCameraTrack.SetValue(false);
             option.publishCustomAudioTrack.SetValue(true);
             option.publishCustomVideoTrack.SetValue(true);
-            option.publishEncodedVideoTrack.SetValue(false);
             option.clientRoleType.SetValue(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
             option.channelProfile.SetValue(CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING);
 
