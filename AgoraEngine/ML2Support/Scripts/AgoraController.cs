@@ -40,7 +40,7 @@ namespace agora_sample
         // Video components
         IVideoRenderManager VideoRenderMgr;
         [SerializeField]
-        CustomVideoCapturer CustomVideoCapture;
+        IVideoCaptureManager CustomVideoCapture;
 
         [Header("Audio Control")]
         [SerializeField]
@@ -168,11 +168,11 @@ namespace agora_sample
                 callOnAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(true); },
                 callOffAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(false); });
 
-            var mlInputs = new MagicLeapInputs();
-            mlInputs.Enable();
-            var controllerActions = new MagicLeapInputs.ControllerActions(mlInputs);
+            //var mlInputs = new MagicLeapInputs();
+            //mlInputs.Enable();
+            //var controllerActions = new MagicLeapInputs.ControllerActions(mlInputs);
 
-            controllerActions.Bumper.performed += HandleOnBumperDown;
+            //controllerActions.Bumper.performed += HandleOnBumperDown;
             // controllerActions.Trigger.performed += HandleOnTriggerDown;
         }
 

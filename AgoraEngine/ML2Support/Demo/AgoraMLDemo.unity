@@ -2048,6 +2048,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: AgoraController
       objectReference: {fileID: 0}
+    - target: {fileID: 2277068097837916318, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: DebugFlag
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2728559731536843762, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
       propertyPath: m_Volume
