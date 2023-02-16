@@ -19,6 +19,7 @@ namespace agora_sample
         Transform SpawnPoint { get; set; }
         Transform ReferenceTransform { get; set; }
         string ChannelName = "";
+        public bool Mirrored = true;
 
         public VideoRenderManager(string channelName, Transform spawnPoint, Transform referenceTransform)
         {
@@ -133,6 +134,8 @@ namespace agora_sample
             go.transform.Rotate(0f, 0.0f, 180.0f);
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.one;
+            int flipping = Mirrored ? -1 : 1;
+            go.transform.localScale = new Vector3(flipping, 1, 1);
             // configure videoSurface
             VideoSurface videoSurface = go.AddComponent<VideoSurface>();
             //videoSurface.OnTextureSizeModify += (int width, int height) =>
