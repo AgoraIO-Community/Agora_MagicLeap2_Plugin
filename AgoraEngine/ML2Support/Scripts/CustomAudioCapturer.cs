@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
-using System.Threading;
 using UnityEngine;
 using Agora.Rtc;
 using RingBuffer;
+
+#if ML2_ENABLE
 using UnityEngine.XR.MagicLeap;
+#endif
 
 namespace agora_sample
 {
@@ -32,15 +34,21 @@ namespace agora_sample
         private int _count;
         private long tick;
 
-        private ML2BufferClip mlAudioBufferClip;
-
         const int AUDIO_CLIP_LENGTH_SECONDS = 60;
 
         IRtcEngine mRtcEngine;
-        private System.Object _rtcLock = new System.Object();
+        // private System.Object _rtcLock = new System.Object();
         double startMillisecond = 0;
         AudioFrame _audioFrame;
         int BufferLength { get; set; }
+
+#if ML2_ENABLE
+        private ML2BufferClip mlAudioBufferClip;
+#else
+        [SerializeField]
+        private AudioSource InputAudioSource = null;
+        private string _deviceMicrophone;
+#endif
 
         private void Awake()
         {
@@ -106,6 +114,7 @@ namespace agora_sample
         // Find and configure audio input, called during Awake
         private void StartMicrophone()
         {
+#if ML2_ENABLE
             var captureType = MLAudioInput.MicCaptureType.VoiceCapture;
             if (!MLPermissions.CheckPermission(MLPermission.RecordAudio).IsOk)
             {
@@ -114,7 +123,40 @@ namespace agora_sample
             }
             mlAudioBufferClip = new ML2BufferClip(MLAudioInput.MicCaptureType.VoiceCapture, AUDIO_CLIP_LENGTH_SECONDS, MLAudioInput.GetSampleRate(captureType));
             mlAudioBufferClip.OnReceiveSampleCallback += HandleAudioBuffer;
+#else
+            StartMicrophone1();
+#endif
         }
+
+#if !ML2_ENABLE
+        // Find and configure audio input, called during Awake
+        private void StartMicrophone1()
+        {
+            if (InputAudioSource == null)
+            {
+                InputAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            // Use the first detected Microphone device.
+            if (Microphone.devices.Length > 0)
+            {
+                _deviceMicrophone = Microphone.devices[0];
+            }
+
+            // If no microphone is detected, exit early and log the error.
+            if (string.IsNullOrEmpty(_deviceMicrophone))
+            {
+                Debug.LogError("Error: HelloVideoAgora.deviceMicrophone could not find a microphone device, disabling script.");
+                enabled = false;
+                return;
+            }
+
+            InputAudioSource.loop = true;
+            InputAudioSource.clip = Microphone.Start(_deviceMicrophone, true, AUDIO_CLIP_LENGTH_SECONDS, SAMPLE_RATE);
+            CHANNEL = InputAudioSource.clip.channels;
+            Debug.Log("StartMicrophone channels = " + CHANNEL);
+        }
+#endif
 
         public void StartPushAudioFrame()
         {
@@ -167,8 +209,36 @@ namespace agora_sample
             //    Debug.Log($"AGORA: HandleAudioBuffer count:{_count}");
             //}
         }
+
+        // This method receives data from the audio source by the Unity engine
+        private void HandleAudioBuffer(float[] data, int channels)
+        {
+            if (!_startConvertSignal) return;
+
+            foreach (var t in data)
+            {
+                var sample = t;
+                if (sample > 1) sample = 1;
+                else if (sample < -1) sample = -1;
+
+                var shortData = (short)(sample * RESCALE_FACTOR);
+                var byteArr = new byte[2];
+                byteArr = BitConverter.GetBytes(shortData);
+                lock (_audioBuffer)
+                {
+                    if (_audioBuffer.Count <= _audioBuffer.Capacity - 2)
+                    {
+                        _audioBuffer.Put(byteArr[0]);
+                        _audioBuffer.Put(byteArr[1]);
+                    }
+                }
+            }
+
+            _count += 1;
+        }
     } /* end of CustomAudioCapturer class */
 
+#if ML2_ENABLE
     /// <summary>
     ///   Extending BufferClip class for callback function
     /// </summary>
@@ -189,5 +259,7 @@ namespace agora_sample
                 OnReceiveSampleCallback(samples);
             }
         }
-    }
+    }
+#endif
+
 }

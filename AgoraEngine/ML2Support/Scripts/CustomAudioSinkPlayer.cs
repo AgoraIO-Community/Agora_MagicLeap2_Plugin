@@ -53,6 +53,7 @@ namespace agora_sample
             {
                 yield return new WaitForFixedUpdate();
                 mRtcEngine = RtcEngine.Instance;
+                Debug.Log("Waiting for RTC...");
             }
 
             var aud = GetComponent<AudioSource>();
@@ -90,7 +91,7 @@ namespace agora_sample
             }
 
             _pullAudioFrameThread = new Thread(PullAudioFrameThread);
-            //_pullAudioFrameThread.Start("pullAudio" + writeCount);
+            //            _pullAudioFrameThread.Start("pullAudio" + writeCount);
             _pullAudioFrameThread.Start();
         }
 
@@ -165,6 +166,7 @@ namespace agora_sample
             BufferPtr = Marshal.AllocHGlobal(samples * bytesPerSample * channels);
             audioFrame.buffer = BufferPtr;
 
+            Debug.Log("PullAudioFrameThread starts");
             while (_pullAudioFrameThreadSignal)
             {
                 int nRet;
@@ -184,6 +186,7 @@ namespace agora_sample
                         lock (_audioBuffer)
                         {
                             _audioBuffer.Put(floatArray);
+                            writeCount += floatArray.Length;
                         }
                     }
                 }
@@ -240,7 +243,7 @@ namespace agora_sample
                     }
                 }
 
-                readCount += 1;
+                readCount += data.Length;
             }
 
             if (DebugFlag)

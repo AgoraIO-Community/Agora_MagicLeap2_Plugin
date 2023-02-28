@@ -2,10 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+#if ML2_ENABLE
 using UnityEngine.XR.MagicLeap;
+using static UnityEngine.XR.MagicLeap.MLCamera;
+#endif
 
 using Agora.Rtc;
-using static UnityEngine.XR.MagicLeap.MLCamera;
 
 namespace agora_sample
 {
@@ -13,6 +15,7 @@ namespace agora_sample
     {
         private IRtcEngine _rtcEngine = null;
 
+#if ML2_ENABLE
         #region -- MagicLeap --
 
         private bool IsCameraConnected => captureCamera != null && captureCamera.ConnectionEstablished;
@@ -374,5 +377,16 @@ namespace agora_sample
             }
         }
         #endregion
+#else
+        public override void ConnectCamera()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void DisconnectCamera()
+        {
+            throw new System.NotImplementedException();
+        }
+#endif
     }
 }
