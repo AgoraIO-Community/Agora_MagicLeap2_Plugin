@@ -237,7 +237,7 @@ namespace agora_sample
             #region -- Agora Event Callbacks --
             public override void OnError(int err, string msg)
             {
-                _app._logger.UpdateLog(string.Format("OnError err: {0}, msg: {1}", err, msg));
+                _app._logger.UpdateLog(string.Format("OnError err: {0}, msg: {1}", err, _app._rtcEngine.GetErrorDescription(err)));
             }
 
             public override void OnJoinChannelSuccess(RtcConnection connection, int elapsed)
