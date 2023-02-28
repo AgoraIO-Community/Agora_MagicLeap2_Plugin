@@ -117,58 +117,6 @@ namespace agora_sample
 
     #region -- Agora Event ---
 
-    internal class UserEventHandler : IRtcEngineEventHandler
-    {
-        private readonly ProcessAudioRawData _agoraVideoRawData;
-
-        internal UserEventHandler(ProcessAudioRawData agoraVideoRawData)
-        {
-            _agoraVideoRawData = agoraVideoRawData;
-        }
-        public override void OnError(int err, string msg)
-        {
-            _agoraVideoRawData.Log.UpdateLog(string.Format("OnError err: {0}, msg: {1}", err, msg));
-        }
-
-        public override void OnJoinChannelSuccess(RtcConnection connection, int elapsed)
-        {
-            int build = 0;
-            _agoraVideoRawData.Log.UpdateLog(string.Format("sdk version: ${0}",
-                _agoraVideoRawData.RtcEngine.GetVersion(ref build)));
-            _agoraVideoRawData.Log.UpdateLog(
-                string.Format("OnJoinChannelSuccess channelName: {0}, uid: {1}, elapsed: {2}",
-                    connection.channelId, connection.localUid, elapsed));
-        }
-
-        public override void OnRejoinChannelSuccess(RtcConnection connection, int elapsed)
-        {
-            _agoraVideoRawData.Log.UpdateLog("OnRejoinChannelSuccess");
-        }
-
-        public override void OnLeaveChannel(RtcConnection connection, RtcStats stats)
-        {
-            _agoraVideoRawData.Log.UpdateLog("OnLeaveChannel");
-        }
-
-        public override void OnClientRoleChanged(RtcConnection connection, CLIENT_ROLE_TYPE oldRole,
-            CLIENT_ROLE_TYPE newRole, ClientRoleOptions newRoleOptions)
-        {
-            _agoraVideoRawData.Log.UpdateLog("OnClientRoleChanged");
-        }
-
-        public override void OnUserJoined(RtcConnection connection, uint uid, int elapsed)
-        {
-            _agoraVideoRawData.Log.UpdateLog(string.Format("OnUserJoined uid: ${0} elapsed: ${1}", uid,
-                elapsed));
-        }
-
-        public override void OnUserOffline(RtcConnection connection, uint uid, USER_OFFLINE_REASON_TYPE reason)
-        {
-            _agoraVideoRawData.Log.UpdateLog(string.Format("OnUserOffLine uid: ${0}, reason: ${1}", uid,
-                (int)reason));
-        }
-    }
-
     internal class AudioFrameObserver : IAudioFrameObserver
     {
         private readonly CustomAudioSinkPlayer _agoraAudioRawData;
@@ -198,7 +146,7 @@ namespace agora_sample
             {
                 Debug.LogWarning("audioFrame = " + audioFrame);
             }
-            var floatArray = ProcessAudioRawData.ConvertByteToFloat16(audioFrame.RawBuffer);
+            var floatArray = CustomAudioSinkPlayer.ConvertByteToFloat16(audioFrame.RawBuffer);
 
             lock (_agoraAudioRawData._audioBuffer)
             {

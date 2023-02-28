@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18029505, g: 0.22572652, b: 0.30692935, a: 1}
+  m_IndirectSpecularColor: {r: 0.44407046, g: 0.49331486, b: 0.57238823, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -260,37 +260,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
-  m_RequiresOpaqueTextureOption: 2
-  m_CameraType: 0
-  m_Cameras: []
-  m_RendererIndex: -1
-  m_VolumeLayerMask:
-    serializedVersion: 2
-    m_Bits: 1
-  m_VolumeTrigger: {fileID: 0}
-  m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
-  m_Antialiasing: 0
-  m_AntialiasingQuality: 2
-  m_StopNaN: 0
-  m_Dithering: 0
-  m_ClearDepth: 1
-  m_AllowXRRendering: 1
-  m_UseScreenCoordOverride: 0
-  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
-  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
-  m_RequiresDepthTexture: 0
-  m_RequiresColorTexture: 0
-  m_Version: 2
-  m_TaaSettings:
-    quality: 3
-    frameInfluence: 0.1
-    jitterScale: 1
-    mipBias: 0
-    varianceClampScale: 0.9
-    contrastAdaptiveSharpening: 0
 --- !u!1001 &358319986
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -299,118 +268,95 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1512593271744470006, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 1512593271744470006, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: InputAudioSource
       value: 
       objectReference: {fileID: 1924212134}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.240125
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.16065
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalPosition.z
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128599, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068096631128601, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068096631128601, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: m_Name
       value: AgoraController
       objectReference: {fileID: 0}
-    - target: {fileID: 2277068097837916318, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 2277068097837916318, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: DebugFlag
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: APP_ID
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: logText
       value: 
       objectReference: {fileID: 580849144}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: SpawnPoint
       value: 
       objectReference: {fileID: 216465410}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: CHANNEL_NAME
-      value: unity3d
+      value: ml2test
       objectReference: {fileID: 0}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: ConnectButton
       value: 
       objectReference: {fileID: 716867734}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: MuteLocalButton
       value: 
       objectReference: {fileID: 1880272276}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: MuteRemoteButton
       value: 
       objectReference: {fileID: 518724744}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: CustomVideoCapture
       value: 
       objectReference: {fileID: 358319988}
-    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: ReferenceTransform
       value: 
       objectReference: {fileID: 216465411}
@@ -419,15 +365,13 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4485746669347922253, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
+    - targetCorrespondingSourceObject: {fileID: 4485746669347922253, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 358319988}
   m_SourcePrefab: {fileID: 100100000, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
 --- !u!1 &358319987 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 4485746669347922253, guid: 7fe6e185edeea4434a1421a08226a74a,
-    type: 3}
+  m_CorrespondingSourceObject: {fileID: 4485746669347922253, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
   m_PrefabInstance: {fileID: 358319986}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &358319988
@@ -443,7 +387,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   VirtualCam: {fileID: 1750693486}
-  VirtualCamRT: {fileID: 8400000, guid: 1ffa83d43bdc7b441a55b281658e07e9, type: 2}
+  VirtualCamRT: {fileID: 8400000, guid: ab2855e4ce2fc4e31a181e99b39c9284, type: 2}
 --- !u!1 &518724739
 GameObject:
   m_ObjectHideFlags: 0
@@ -1445,7 +1389,7 @@ Camera:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingPath: -1
-  m_TargetTexture: {fileID: 8400000, guid: 1ffa83d43bdc7b441a55b281658e07e9, type: 2}
+  m_TargetTexture: {fileID: 8400000, guid: ab2855e4ce2fc4e31a181e99b39c9284, type: 2}
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
@@ -6515,8 +6459,7 @@ ParticleSystem:
     vectorLabel1_3: W
 --- !u!82 &1924212134 stripped
 AudioSource:
-  m_CorrespondingSourceObject: {fileID: 2728559731536843762, guid: 7fe6e185edeea4434a1421a08226a74a,
-    type: 3}
+  m_CorrespondingSourceObject: {fileID: 2728559731536843762, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
   m_PrefabInstance: {fileID: 358319986}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2036980441
@@ -6626,14 +6569,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 3
-  m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
-  m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
-  m_LightCookieSize: {x: 1, y: 1}
-  m_LightCookieOffset: {x: 0, y: 0}
-  m_SoftShadowQuality: 0
