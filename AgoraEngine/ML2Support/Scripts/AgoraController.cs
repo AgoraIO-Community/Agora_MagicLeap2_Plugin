@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Agora.Rtc;
 using Agora.Util;
@@ -122,6 +121,7 @@ namespace agora_sample
             {
                 Debug.Log("[Agora] Using Custom Audio Sink");
                 _rtcEngine.SetExternalAudioSink(true, CustomAudioSink.SAMPLE_RATE, CustomAudioSink.CHANNEL);
+                CustomAudioSink.InitEngineSink(_rtcEngine);
             }
 
 
@@ -211,18 +211,6 @@ namespace agora_sample
                 _rtcEngine.Dispose();
                 _rtcEngine = null;
             }
-        }
-
-        private void HandleOnBumperDown(InputAction.CallbackContext inputCallback)
-        {
-            Debug.Log("(BUMPER) Connecting camera...");
-            CustomVideoCapture.ConnectCamera();
-        }
-
-        private void HandleOnTriggerDown(InputAction.CallbackContext inputCallback)
-        {
-            Debug.Log("(Trigger) Disconnecting camera...");
-            CustomVideoCapture.DisconnectCamera();
         }
 
         internal class UserEventHandler : IRtcEngineEventHandler

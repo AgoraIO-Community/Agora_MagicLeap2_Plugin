@@ -4,6 +4,9 @@ using System.Threading;
 using UnityEngine;
 using Agora.Rtc;
 using RingBuffer;
+//using System.Diagnostics;
+using Agora_RTC_Plugin.API_Example.Examples.Advanced.ProcessAudioRawData;
+using Agora.Util;
 
 namespace agora_sample
 {
@@ -13,208 +16,94 @@ namespace agora_sample
     /// </summary>
     public class CustomAudioSinkPlayer : MonoBehaviour
     {
-        private IRtcEngine mRtcEngine = null;
+        internal IRtcEngine RtcEngine;
 
-        public int CHANNEL = 1;
-        public int SAMPLE_RATE = 44100;
-        public int PULL_FREQ_PER_SEC = 100;
-        public bool DebugFlag = false;
+        public readonly int CHANNEL = 1;
+        public readonly int PULL_FREQ_PER_SEC = 100;
+        public readonly int SAMPLE_RATE = 32000; // this should = CLIP_SAMPLES x PULL_FREQ_PER_SEC
+        public readonly int CLIP_SAMPLES = 320;
 
-        int SAMPLES;
-        int FREQ;
-        int BUFFER_SIZE;
+        internal int _count;
 
-        private int writeCount = 0;
-        private int readCount = 0;
+        internal int _writeCount;
+        internal int _readCount;
 
-        private RingBuffer<float> _audioBuffer;
-        private AudioClip _audioClip;
+        internal RingBuffer<float> _audioBuffer;
+        internal AudioClip _audioClip;
+
+        private bool _startSignal;
 
 
-        private Thread _pullAudioFrameThread = null;
-        private System.Object _rtcLock = new System.Object();
-        private bool _pullAudioFrameThreadSignal = true;
-
-        IntPtr BufferPtr { get; set; }
-
-        // Start is called before the first frame update
         void Start()
         {
-            SAMPLES = SAMPLE_RATE / PULL_FREQ_PER_SEC * CHANNEL;
-            FREQ = 1000 / PULL_FREQ_PER_SEC;
-            BUFFER_SIZE = SAMPLES * (int)BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE;
-
-            StartCoroutine(CoStartRunning());
+            //if (CheckAppId())
+            {
+                var aud = GetComponent<AudioSource>();
+                if (aud == null)
+                {
+                    gameObject.AddComponent<AudioSource>();
+                }
+                SetupAudio(aud, "externalClip");
+            }
         }
 
-        System.Collections.IEnumerator CoStartRunning()
+        // Update is called once per frame
+        void Update()
         {
-            while (mRtcEngine == null)
-            {
-                yield return new WaitForFixedUpdate();
-                mRtcEngine = RtcEngine.Instance;
-                Debug.Log("Waiting for RTC...");
-            }
-
-            var aud = GetComponent<AudioSource>();
-            if (aud == null)
-            {
-                aud = gameObject.AddComponent<AudioSource>();
-            }
-            KickStartAudio(aud, "externalClip");
+            PermissionHelper.RequestMicrophontPermission();
+            PermissionHelper.RequestCameraPermission();
         }
 
-        void KickStartAudio(AudioSource aud, string clipName)
+        public void InitEngineSink(IRtcEngine engine)
         {
-            var bufferLength = SAMPLES * 100; // 1-sec-length buffer
+            RtcEngine = engine;
+            RtcEngine.RegisterAudioFrameObserver(new AudioFrameObserver(this), OBSERVER_MODE.RAW_DATA);
+            RtcEngine.SetPlaybackAudioFrameParameters(SAMPLE_RATE, 1, RAW_AUDIO_FRAME_OP_MODE_TYPE.RAW_AUDIO_FRAME_OP_MODE_READ_ONLY, 1024);
+        }
 
-            // allow overflow to prevent edge case 
-            _audioBuffer = new RingBuffer<float>(bufferLength, overflow: true);
+        private void OnDestroy()
+        {
+            Debug.Log(name + " OnDestroy");
+            if (RtcEngine != null)
+            {
+                RtcEngine.UnRegisterAudioFrameObserver();
+            }
+        }
 
-            // Create and start the AudioClip playback, OnAudioRead will feed it
+        void SetupAudio(AudioSource aud, string clipName)
+        {
+            // //The larger the buffer, the higher the delay
+            var bufferLength = SAMPLE_RATE / PULL_FREQ_PER_SEC * CHANNEL * 100; // 1-sec-length buffer
+            _audioBuffer = new RingBuffer<float>(bufferLength, true);
+
             _audioClip = AudioClip.Create(clipName,
-                SAMPLE_RATE / PULL_FREQ_PER_SEC * CHANNEL, CHANNEL, SAMPLE_RATE, true,
+                CLIP_SAMPLES,
+                CHANNEL, SAMPLE_RATE, true,
                 OnAudioRead);
             aud.clip = _audioClip;
             aud.loop = true;
             aud.Play();
-
-            StartPullAudioThread();
         }
 
-        void StartPullAudioThread()
+        private void OnAudioRead(float[] data)
         {
-            if (_pullAudioFrameThread != null)
-            {
-                Debug.LogWarning("Stopping previous thread");
-                _pullAudioFrameThread.Abort();
-            }
 
-            _pullAudioFrameThread = new Thread(PullAudioFrameThread);
-            //            _pullAudioFrameThread.Start("pullAudio" + writeCount);
-            _pullAudioFrameThread.Start();
-        }
-
-        bool _paused = false;
-        private void OnApplicationPause(bool pause)
-        {
-            if (pause)
+            for (var i = 0; i < data.Length; i++)
             {
-                if (DebugFlag)
+                lock (_audioBuffer)
                 {
-                    Debug.Log("Application paused. AudioBuffer length = " + _audioBuffer.Size);
-                    Debug.Log("PullAudioFrameThread state = " + _pullAudioFrameThread.ThreadState + " signal =" + _pullAudioFrameThreadSignal);
-                }
-
-                // Invalidate the buffer
-                _pullAudioFrameThread.Abort();
-                _pullAudioFrameThread = null;
-                _paused = true;
-            }
-            else
-            {
-                if (_paused) // had been paused, not from starting up
-                {
-                    Debug.Log("Resuming PullAudioThread");
-                    _audioBuffer.Clear();
-                    StartPullAudioThread();
-                }
-            }
-        }
-
-
-        void OnDestroy()
-        {
-            Debug.Log("OnApplicationQuit");
-            _pullAudioFrameThreadSignal = false;
-            _audioBuffer.Clear();
-            if (BufferPtr != IntPtr.Zero)
-            {
-                Debug.LogWarning("cleanning up IntPtr buffer");
-                Marshal.FreeHGlobal(BufferPtr);
-                BufferPtr = IntPtr.Zero;
-            }
-        }
-        //get timestamp millisecond
-        private double GetTimestamp()
-        {
-            TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            return ts.TotalMilliseconds;
-        }
-
-        private void PullAudioFrameThread()
-        {
-            var avsync_type = 0;
-            var bytesPerSample = 2;
-            var type = AUDIO_FRAME_TYPE.FRAME_TYPE_PCM16;
-            var channels = CHANNEL;
-            var samples = SAMPLE_RATE / PULL_FREQ_PER_SEC * CHANNEL;
-            var samplesPerSec = SAMPLE_RATE;
-            var buffer = new byte[samples * bytesPerSample];
-            var freq = 1000 / PULL_FREQ_PER_SEC;
-
-            // BufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
-
-            var tic = new TimeSpan(DateTime.Now.Ticks);
-
-            var byteArray = new byte[BUFFER_SIZE];
-            double startMillisecond = GetTimestamp();
-            long tick = 0;
-
-            AudioFrame audioFrame = new AudioFrame(
-             type, samples, BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE, channels, samplesPerSec, buffer, 0, avsync_type);
-            BufferPtr = Marshal.AllocHGlobal(samples * bytesPerSample * channels);
-            audioFrame.buffer = BufferPtr;
-
-            Debug.Log("PullAudioFrameThread starts");
-            while (_pullAudioFrameThreadSignal)
-            {
-                int nRet;
-                lock (_rtcLock)
-                {
-                    if (mRtcEngine == null)
+                    if (_audioBuffer.Count > 0)
                     {
-                        break;
-                    }
-                    nRet = -1;
-                    nRet = mRtcEngine.PullAudioFrame(audioFrame);
-
-                    if (nRet == 0)
-                    {
-                        Marshal.Copy((IntPtr)audioFrame.buffer, buffer, 0, buffer.Length);
-                        var floatArray = ConvertByteToFloat16(buffer);
-                        lock (_audioBuffer)
-                        {
-                            _audioBuffer.Put(floatArray);
-                            writeCount += floatArray.Length;
-                        }
+                        data[i] = _audioBuffer.Get();
+                        _readCount += 1;
                     }
                 }
-
-                if (nRet == 0)
-                {
-                    tick++;
-                    double nextMillisecond = startMillisecond + tick * freq;
-                    double curMillisecond = GetTimestamp();
-                    int sleepMillisecond = (int)Math.Ceiling(nextMillisecond - curMillisecond);
-                    if (sleepMillisecond > 0)
-                    {
-                        Thread.Sleep(sleepMillisecond);
-                    }
-                }
-
             }
 
-            if (BufferPtr != IntPtr.Zero)
-            {
-                Marshal.FreeHGlobal(BufferPtr);
-                BufferPtr = IntPtr.Zero;
-            }
-
-            Debug.Log("Done running pull audio thread");
+            Debug.LogFormat("buffer length remains: {0}", _writeCount - _readCount);
         }
 
-        private static float[] ConvertByteToFloat16(byte[] byteArray)
+        internal static float[] ConvertByteToFloat16(byte[] byteArray)
         {
             var floatArray = new float[byteArray.Length / 2];
             for (var i = 0; i < floatArray.Length; i++)
@@ -224,32 +113,145 @@ namespace agora_sample
 
             return floatArray;
         }
+    }
 
-        // This Monobehavior method feeds data into the audio source
-        private void OnAudioRead(float[] data)
+    #region -- Agora Event ---
+
+    internal class UserEventHandler : IRtcEngineEventHandler
+    {
+        private readonly ProcessAudioRawData _agoraVideoRawData;
+
+        internal UserEventHandler(ProcessAudioRawData agoraVideoRawData)
         {
-            for (var i = 0; i < data.Length; i++)
-            {
-                lock (_audioBuffer)
-                {
-                    if (_audioBuffer.Count > 0)
-                    {
-                        data[i] = _audioBuffer.Get();
-                    }
-                    else
-                    {
-                        // no data
-                        data[i] = 0;
-                    }
-                }
+            _agoraVideoRawData = agoraVideoRawData;
+        }
+        public override void OnError(int err, string msg)
+        {
+            _agoraVideoRawData.Log.UpdateLog(string.Format("OnError err: {0}, msg: {1}", err, msg));
+        }
 
-                readCount += data.Length;
-            }
+        public override void OnJoinChannelSuccess(RtcConnection connection, int elapsed)
+        {
+            int build = 0;
+            _agoraVideoRawData.Log.UpdateLog(string.Format("sdk version: ${0}",
+                _agoraVideoRawData.RtcEngine.GetVersion(ref build)));
+            _agoraVideoRawData.Log.UpdateLog(
+                string.Format("OnJoinChannelSuccess channelName: {0}, uid: {1}, elapsed: {2}",
+                    connection.channelId, connection.localUid, elapsed));
+        }
 
-            if (DebugFlag)
-            {
-                Debug.LogFormat("buffer length remains: {0}", writeCount - readCount);
-            }
+        public override void OnRejoinChannelSuccess(RtcConnection connection, int elapsed)
+        {
+            _agoraVideoRawData.Log.UpdateLog("OnRejoinChannelSuccess");
+        }
+
+        public override void OnLeaveChannel(RtcConnection connection, RtcStats stats)
+        {
+            _agoraVideoRawData.Log.UpdateLog("OnLeaveChannel");
+        }
+
+        public override void OnClientRoleChanged(RtcConnection connection, CLIENT_ROLE_TYPE oldRole,
+            CLIENT_ROLE_TYPE newRole, ClientRoleOptions newRoleOptions)
+        {
+            _agoraVideoRawData.Log.UpdateLog("OnClientRoleChanged");
+        }
+
+        public override void OnUserJoined(RtcConnection connection, uint uid, int elapsed)
+        {
+            _agoraVideoRawData.Log.UpdateLog(string.Format("OnUserJoined uid: ${0} elapsed: ${1}", uid,
+                elapsed));
+        }
+
+        public override void OnUserOffline(RtcConnection connection, uint uid, USER_OFFLINE_REASON_TYPE reason)
+        {
+            _agoraVideoRawData.Log.UpdateLog(string.Format("OnUserOffLine uid: ${0}, reason: ${1}", uid,
+                (int)reason));
         }
     }
+
+    internal class AudioFrameObserver : IAudioFrameObserver
+    {
+        private readonly CustomAudioSinkPlayer _agoraAudioRawData;
+        private AudioParams _audioParams;
+
+
+        internal AudioFrameObserver(CustomAudioSinkPlayer agoraAudioRawData)
+        {
+            _agoraAudioRawData = agoraAudioRawData;
+            _audioParams = new AudioParams();
+            _audioParams.sample_rate = 16000;
+            _audioParams.channels = 2;
+            _audioParams.mode = RAW_AUDIO_FRAME_OP_MODE_TYPE.RAW_AUDIO_FRAME_OP_MODE_READ_ONLY;
+            _audioParams.samples_per_call = 1024;
+        }
+
+        public override bool OnRecordAudioFrame(string channelId, AudioFrame audioFrame)
+        {
+            Debug.Log("OnRecordAudioFrame-----------");
+            return true;
+        }
+
+        public override bool OnPlaybackAudioFrame(string channelId, AudioFrame audioFrame)
+        {
+            Debug.Log("OnPlaybackAudioFrame-----------");
+            if (_agoraAudioRawData._count == 1)
+            {
+                Debug.LogWarning("audioFrame = " + audioFrame);
+            }
+            var floatArray = ProcessAudioRawData.ConvertByteToFloat16(audioFrame.RawBuffer);
+
+            lock (_agoraAudioRawData._audioBuffer)
+            {
+                _agoraAudioRawData._audioBuffer.Put(floatArray);
+                _agoraAudioRawData._writeCount += floatArray.Length;
+                _agoraAudioRawData._count++;
+            }
+            return true;
+        }
+
+        public override int GetObservedAudioFramePosition()
+        {
+            Debug.Log("GetObservedAudioFramePosition-----------");
+            return (int)(AUDIO_FRAME_POSITION.AUDIO_FRAME_POSITION_PLAYBACK |
+                AUDIO_FRAME_POSITION.AUDIO_FRAME_POSITION_RECORD |
+                AUDIO_FRAME_POSITION.AUDIO_FRAME_POSITION_BEFORE_MIXING |
+                AUDIO_FRAME_POSITION.AUDIO_FRAME_POSITION_MIXED);
+        }
+
+        public override AudioParams GetPlaybackAudioParams()
+        {
+            Debug.Log("GetPlaybackAudioParams-----------");
+            return this._audioParams;
+        }
+
+        public override AudioParams GetRecordAudioParams()
+        {
+            Debug.Log("GetRecordAudioParams-----------");
+            return this._audioParams;
+        }
+
+        public override AudioParams GetMixedAudioParams()
+        {
+            Debug.Log("GetMixedAudioParams-----------");
+            return this._audioParams;
+        }
+
+        public override bool OnPlaybackAudioFrameBeforeMixing(string channel_id,
+                                                        uint uid,
+                                                        AudioFrame audio_frame)
+        {
+            Debug.Log("OnPlaybackAudioFrameBeforeMixing-----------");
+            return false;
+        }
+
+        public override bool OnPlaybackAudioFrameBeforeMixing(string channel_id,
+                                                        string uid,
+                                                        AudioFrame audio_frame)
+        {
+            Debug.Log("OnPlaybackAudioFrameBeforeMixing2-----------");
+            return false;
+        }
+    }
+
+    #endregion
 }
