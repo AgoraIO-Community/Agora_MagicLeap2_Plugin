@@ -15,7 +15,7 @@ namespace agora_sample
     /// capture voice input through ML2Audio.  The audio buffer is pushed
     /// constantly using the PushAudioFrame API in a thread. 
     /// </summary>
-    public class CustomAudioCapturer : MonoBehaviour
+    public class CustomAudioCapturer : IAudioCaptureManager
     {
         // Audio stuff
         public static int CHANNEL = 1;
@@ -53,7 +53,6 @@ namespace agora_sample
         private void Awake()
         {
             StartMicrophone();
-            StartCoroutine(CoStartRunning());
         }
 
         private void OnDestroy()
@@ -61,13 +60,9 @@ namespace agora_sample
             StopAudioPush();
         }
 
-        IEnumerator CoStartRunning()
+        public override void Init(Agora.Rtc.IRtcEngine engine)
         {
-            while (mRtcEngine == null)
-            {
-                yield return new WaitForFixedUpdate();
-                mRtcEngine = RtcEngine.Instance;
-            }
+            mRtcEngine = engine;
 
             var bytesPerSample = (int)BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE;
             var samples = SAMPLE_RATE / PUSH_FREQ_PER_SEC;
@@ -108,7 +103,6 @@ namespace agora_sample
                     }
                 }
             }
-
         }
 
         // Find and configure audio input, called during Awake
@@ -158,7 +152,7 @@ namespace agora_sample
         }
 #endif
 
-        public void StartPushAudioFrame()
+        public override void StartAudioPush()
         {
             tick = 0;
             startMillisecond = GetTimestamp();
@@ -168,7 +162,7 @@ namespace agora_sample
             _pushAudioFrameThreadSignal = true;
         }
 
-        public void StopAudioPush()
+        public override void StopAudioPush()
         {
             _pushAudioFrameThreadSignal = false;
         }

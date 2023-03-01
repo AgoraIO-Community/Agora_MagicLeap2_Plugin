@@ -43,9 +43,9 @@ namespace agora_sample
 
         [Header("Audio Control")]
         [SerializeField]
-        CustomAudioSinkPlayer CustomAudioSink;
+        IAudioRenderManager CustomAudioSink;
         [SerializeField]
-        CustomAudioCapturer CustomAudioCapture;
+        IAudioCaptureManager CustomAudioCapture;
 
         internal agora_utilities.Logger _logger;
         private IRtcEngine _rtcEngine = null;
@@ -119,11 +119,12 @@ namespace agora_sample
             // use external audio sink
             if (CustomAudioSink != null)
             {
-                Debug.Log("[Agora] Using Custom Audio Sink");
+                Debug.Log("[Agora] Using Custom Audio Renderer");
                 //_rtcEngine.SetExternalAudioSink(true, CustomAudioSink.SAMPLE_RATE, CustomAudioSink.CHANNEL);
-                CustomAudioSink.InitEngineSink(_rtcEngine);
+                CustomAudioSink.Init(_rtcEngine);
             }
 
+            CustomAudioCapture?.Init(_rtcEngine);
 
             // If AppID is certifcate enabled, use token.
             if (UseToken)
@@ -235,7 +236,7 @@ namespace agora_sample
                     _app._rtcEngine.GetVersion(ref build)));
                 _app._logger.UpdateLog(string.Format("OnJoinChannelSuccess channelName: {0}, uid: {1}, elapsed: {2}",
                         connection.channelId, connection.localUid, elapsed));
-                _app.CustomAudioCapture?.StartPushAudioFrame();
+                _app.CustomAudioCapture?.StartAudioPush();
             }
 
             public override void OnRejoinChannelSuccess(RtcConnection connection, int elapsed)

@@ -14,7 +14,7 @@ namespace agora_sample
     /// The Custom AudioSink Player class receives audio frames from the
     /// Agora channel and applies the buffer to an AudioSource for playback.
     /// </summary>
-    public class CustomAudioSinkPlayer : MonoBehaviour
+    public class CustomAudioSinkPlayer : IAudioRenderManager
     {
         internal IRtcEngine RtcEngine;
 
@@ -54,7 +54,7 @@ namespace agora_sample
             PermissionHelper.RequestCameraPermission();
         }
 
-        public void InitEngineSink(IRtcEngine engine)
+        public override void Init(IRtcEngine engine)
         {
             RtcEngine = engine;
             RtcEngine.RegisterAudioFrameObserver(new AudioFrameObserver(this), OBSERVER_MODE.RAW_DATA);
