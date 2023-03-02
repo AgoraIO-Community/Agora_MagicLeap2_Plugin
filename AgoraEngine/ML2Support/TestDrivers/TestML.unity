@@ -345,6 +345,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 716867734}
     - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
+      propertyPath: CustomAudioSink
+      value: 
+      objectReference: {fileID: 358319989}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
       propertyPath: MuteLocalButton
       value: 
       objectReference: {fileID: 1880272276}
@@ -388,6 +392,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   VirtualCam: {fileID: 1750693486}
   VirtualCamRT: {fileID: 8400000, guid: ab2855e4ce2fc4e31a181e99b39c9284, type: 2}
+--- !u!114 &358319989 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2277068097837916318, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
+  m_PrefabInstance: {fileID: 358319986}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7292bdf3e99b5cc42be5eb9a71b91d55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &518724739
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,7 +813,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d8b81c82d1c55e44abde4866c4ab4ee3, type: 2}
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

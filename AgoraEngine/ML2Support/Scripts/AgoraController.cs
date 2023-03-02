@@ -120,7 +120,6 @@ namespace agora_sample
             if (CustomAudioSink != null)
             {
                 Debug.Log("[Agora] Using Custom Audio Renderer");
-                //_rtcEngine.SetExternalAudioSink(true, CustomAudioSink.SAMPLE_RATE, CustomAudioSink.CHANNEL);
                 CustomAudioSink.Init(_rtcEngine);
             }
 
