@@ -34,6 +34,13 @@ namespace agora_sample
         private Texture2D BufferTexture = null;
         private static int ShareCameraMode = 1;  // 0 = unsafe buffer pointer, 1 = renderer imag
 
+        private IRtcEngine _rtc;
+        private object _lock;
+        public override void Init(IRtcEngine engine, object rtclock)
+        {
+            _rtc = engine;
+            _lock = rtclock;
+        }
 
         public override void ConnectCamera()
         {
@@ -112,9 +119,8 @@ namespace agora_sample
                 yield break;
             }
 
-            IRtcEngine rtc = RtcEngine.Instance;
             //if the engine is present
-            if (rtc != null)
+            if (_rtc != null)
             {
                 //Create a new external video frame
                 ExternalVideoFrame externalVideoFrame = new ExternalVideoFrame();
@@ -142,7 +148,10 @@ namespace agora_sample
                 externalVideoFrame.timestamp = 0;
                 //Push the external video frame with the frame we just created
                 int a = 0;
-                rtc.PushVideoFrame(externalVideoFrame);
+                lock (_lock)
+                {
+                    _rtc.PushVideoFrame(externalVideoFrame);
+                }
                 if (timestamp % 100 == 0) Debug.Log(" pushVideoFrame(" + timestamp + ") size:" + bytes.Length + " => " + a);
             }
 

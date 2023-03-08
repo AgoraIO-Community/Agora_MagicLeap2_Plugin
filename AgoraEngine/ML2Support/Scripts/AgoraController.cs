@@ -27,6 +27,8 @@ namespace agora_sample
 
         [SerializeField]
         CLIENT_ROLE_TYPE CLIENT_ROLE = CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER;
+        [SerializeField]
+        LOG_LEVEL LogLevel = LOG_LEVEL.LOG_LEVEL_INFO;
 
         [Header("UI Manager")]
         [SerializeField] GameObject SpawnPoint;
@@ -52,6 +54,9 @@ namespace agora_sample
         private uint _clientUID = 0;  // used for join channel, default is 0
 
         private bool appReady = false;
+
+        // Use this lock for protecting single access to RTC API calls
+        public static readonly object RtcLock = new object();
 
         // Use this for initialization
         void Awake()
@@ -110,20 +115,13 @@ namespace agora_sample
             _rtcEngine.SetAudioProfile(AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT, AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING);
 
             _rtcEngine.EnableVideo();
-            // Agora does not have direct access to ML2 camera, so enable external source for input 
-            var ret = _rtcEngine.SetExternalVideoSource(true, false, EXTERNAL_VIDEO_SOURCE_TYPE.VIDEO_FRAME, new SenderOptions());
-            this._logger.UpdateLog("SetExternalVideoSource returns:" + ret);
 
-            // _rtcEngine.SetDefaultAudioRouteToSpeakerphone(true);
+            _rtcEngine.SetLogLevel(LogLevel);
+            _rtcEngine.SetLogFile(Application.persistentDataPath + "/log.txt");
 
-            // use external audio sink
-            if (CustomAudioSink != null)
-            {
-                Debug.Log("[Agora] Using Custom Audio Renderer");
-                CustomAudioSink.Init(_rtcEngine);
-            }
-
-            CustomAudioCapture?.Init(_rtcEngine);
+            CustomVideoCapture?.Init(_rtcEngine, RtcLock);
+            CustomAudioSink?.Init(_rtcEngine, RtcLock);
+            CustomAudioCapture?.Init(_rtcEngine, RtcLock);
 
             // If AppID is certifcate enabled, use token.
             if (UseToken)
@@ -134,7 +132,7 @@ namespace agora_sample
                 TokenClient.Instance.GetRtcToken(CHANNEL_NAME, _clientUID, (token) =>
                 {
                     TOKEN = token;
-                    Debug.Log("Gotten token:" + token);
+                    Debug.Log("Agora rtc token:" + token);
                     callback();
                 });
             }
@@ -167,19 +165,10 @@ namespace agora_sample
             MuteRemoteButton.Setup(false, "Mute Remote", "UnMute Remote",
                 callOnAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(true); },
                 callOffAction: () => { _rtcEngine.MuteAllRemoteAudioStreams(false); });
-
-            //var mlInputs = new MagicLeapInputs();
-            //mlInputs.Enable();
-            //var controllerActions = new MagicLeapInputs.ControllerActions(mlInputs);
-
-            //controllerActions.Bumper.performed += HandleOnBumperDown;
-            // controllerActions.Trigger.performed += HandleOnTriggerDown;
         }
 
         void JoinChannel()
         {
-            //     _rtcEngine.JoinChannel(TOKEN, CHANNEL_NAME, "", _clientUID);
-
             var option = new ChannelMediaOptions();
             option.autoSubscribeVideo.SetValue(true);
             option.autoSubscribeAudio.SetValue(true);

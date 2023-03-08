@@ -42,6 +42,8 @@ namespace agora_sample
         AudioFrame _audioFrame;
         int BufferLength { get; set; }
 
+        private object _rtclock;
+
 #if ML2_ENABLE
         private ML2BufferClip mlAudioBufferClip;
 #else
@@ -60,9 +62,10 @@ namespace agora_sample
             StopAudioPush();
         }
 
-        public override void Init(Agora.Rtc.IRtcEngine engine)
+        public override void Init(Agora.Rtc.IRtcEngine engine, object rtclock)
         {
             mRtcEngine = engine;
+            _rtclock = rtclock;
 
             var bytesPerSample = (int)BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE;
             var samples = SAMPLE_RATE / PUSH_FREQ_PER_SEC;
@@ -90,17 +93,24 @@ namespace agora_sample
             if (_pushAudioFrameThreadSignal && mRtcEngine != null && _nextSendOK)
             {
                 int nRet = -1;
+                int j = 0;
                 lock (_audioBuffer)
                 {
                     if (_audioBuffer.Size > BufferLength)
                     {
-                        for (var j = 0; j < BufferLength; j++)
+                        for (; j < BufferLength; j++)
                         {
                             _audioFrame.RawBuffer[j] = _audioBuffer.Get();
                         }
-                        nRet = mRtcEngine.PushAudioFrame(MEDIA_SOURCE_TYPE.AUDIO_PLAYOUT_SOURCE, _audioFrame);
-                        tick++;
                     }
+                }
+                if (j > 0) // has data to send
+                {
+                    lock (_rtclock)
+                    {
+                        nRet = mRtcEngine.PushAudioFrame(MEDIA_SOURCE_TYPE.AUDIO_PLAYOUT_SOURCE, _audioFrame);
+                    }
+                    tick++;
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace agora_sample
     public class CustomVideoCapturer : IVideoCaptureManager
     {
         private IRtcEngine _rtcEngine = null;
-
+        private object _rtclock = null;
 #if ML2_ENABLE
         #region -- MagicLeap --
 
@@ -39,25 +39,22 @@ namespace agora_sample
         MLCamera.ConnectFlag MLConnectFlag = MLCamera.ConnectFlag.MR;
 
         private readonly MLPermissions.Callbacks permissionCallbacks = new MLPermissions.Callbacks();
+
+
         private void Awake()
         {
             permissionCallbacks.OnPermissionGranted += OnPermissionGranted;
             permissionCallbacks.OnPermissionDenied += OnPermissionDenied;
             permissionCallbacks.OnPermissionDeniedAndDontAskAgain += OnPermissionDenied;
         }
+
         private IEnumerator Start()
         {
             MLPermissions.RequestPermission(MLPermission.Camera, permissionCallbacks);
             MLPermissions.RequestPermission(MLPermission.RecordAudio, permissionCallbacks);
 
+            yield return null;
             TryEnableMLCamera();
-
-            while (_rtcEngine == null)
-            {
-                yield return new WaitForSeconds(0.1f);
-                // Main logic controller should initialize the RTCEngine with AppID
-                _rtcEngine = RtcEngine.Instance;
-            }
         }
 
         /// <summary>
@@ -66,6 +63,15 @@ namespace agora_sample
         void OnDisable()
         {
             DisconnectCamera();
+        }
+
+        public override void Init(Agora.Rtc.IRtcEngine engine, object rtclock)
+        {
+            _rtcEngine = engine;
+            _rtclock = rtclock;
+            // Agora does not have direct access to ML2 camera, so enable external source for input 
+            var ret = _rtcEngine.SetExternalVideoSource(true, false, EXTERNAL_VIDEO_SOURCE_TYPE.VIDEO_FRAME, new SenderOptions());
+            Debug.Log("SetExternalVideoSource returns:" + ret);
         }
 
         private void OnPermissionDenied(string permission)

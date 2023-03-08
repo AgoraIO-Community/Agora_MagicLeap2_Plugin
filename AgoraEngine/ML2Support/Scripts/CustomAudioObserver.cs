@@ -4,7 +4,6 @@ using System.Threading;
 using UnityEngine;
 using Agora.Rtc;
 using RingBuffer;
-//using System.Diagnostics;
 using Agora_RTC_Plugin.API_Example.Examples.Advanced.ProcessAudioRawData;
 using Agora.Util;
 
@@ -54,7 +53,7 @@ namespace agora_sample
             PermissionHelper.RequestCameraPermission();
         }
 
-        public override void Init(IRtcEngine engine)
+        public override void Init(IRtcEngine engine, object rtclock)
         {
             RtcEngine = engine;
             RtcEngine.RegisterAudioFrameObserver(new AudioFrameObserver2(this), OBSERVER_MODE.RAW_DATA);

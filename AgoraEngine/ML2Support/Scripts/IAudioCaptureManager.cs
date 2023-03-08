@@ -6,7 +6,7 @@ namespace agora_sample
 {
     public abstract class IAudioCaptureManager : MonoBehaviour
     {
-        public abstract void Init(Agora.Rtc.IRtcEngine engine);
+        public abstract void Init(Agora.Rtc.IRtcEngine engine, object rtclock);
         public abstract void StartAudioPush();
         public abstract void StopAudioPush();
     }
