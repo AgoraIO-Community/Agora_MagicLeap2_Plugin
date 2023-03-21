@@ -1,4 +1,4 @@
-﻿namespace agora_sample
+﻿namespace Agora.Rtc.Extended
 {
     /// <summary>
     ///   This interface declares the neccessary methods for managing the views for video streaming.

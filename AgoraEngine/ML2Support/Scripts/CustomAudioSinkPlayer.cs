@@ -6,7 +6,7 @@ using UnityEngine;
 using Agora.Rtc;
 using RingBuffer;
 
-namespace agora_sample
+namespace Agora.Rtc.Extended
 {
     /// <summary>
     /// The Custom AudioSink Player class receives audio frames from the
@@ -61,6 +61,9 @@ namespace agora_sample
             mRtcEngine = engine;
             _rtclock = rtclock;
             mRtcEngine.SetExternalAudioSink(true, SAMPLE_RATE, CHANNEL);
+
+            // Increase playback overall volume
+            mRtcEngine.AdjustPlaybackSignalVolume(200);
         }
 
         void KickStartAudio(AudioSource aud, string clipName)

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using Agora.Rtc;
 using Agora.Util;
 
-namespace agora_sample
+namespace Agora.Rtc.Extended
 {
     /// <summary>
     ///    The AgoraController serves as the simple plugin controller for MagicLeap2.

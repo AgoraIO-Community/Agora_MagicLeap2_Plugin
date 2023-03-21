@@ -8,7 +8,7 @@ using RingBuffer;
 using UnityEngine.XR.MagicLeap;
 #endif
 
-namespace agora_sample
+namespace Agora.Rtc.Extended
 {
     /// <summary>
     /// The Custom Audio Capturer class uses Microphone audio source to

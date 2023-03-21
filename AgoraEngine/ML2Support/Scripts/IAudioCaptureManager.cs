@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace agora_sample
+namespace Agora.Rtc.Extended
 {
     public abstract class IAudioCaptureManager : MonoBehaviour
     {

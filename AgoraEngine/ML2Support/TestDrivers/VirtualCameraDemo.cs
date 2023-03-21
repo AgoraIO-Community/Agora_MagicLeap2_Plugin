@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using Agora.Rtc;
 using UnityEngine;
+using Agora.Rtc.Extended;
 
 namespace agora_sample
 {
+    // This example runs on the non-ML2 environment to test pushVideoFrame
     public class VirtualCameraDemo : IVideoCaptureManager
     {
         [SerializeField]
@@ -19,12 +21,6 @@ namespace agora_sample
             width = 1280,
             height = 720
         };
-        //[SerializeField]
-        //private int bitrate = 1130;
-        //private FRAME_RATE frameRate = FRAME_RATE.FRAME_RATE_FPS_30;
-        //[SerializeField]
-        //private VIDEO_MIRROR_MODE_TYPE mirrorMode = VIDEO_MIRROR_MODE_TYPE.VIDEO_MIRROR_MODE_DISABLED;
-        // use bitrate: 2260 for broadcast mode
 
         // Pixel format
         public static TextureFormat ConvertFormat = TextureFormat.RGBA32;

@@ -9,7 +9,7 @@ using static UnityEngine.XR.MagicLeap.MLCamera;
 
 using Agora.Rtc;
 
-namespace agora_sample
+namespace Agora.Rtc.Extended
 {
     public class CustomVideoCapturer : IVideoCaptureManager
     {
@@ -374,7 +374,10 @@ namespace agora_sample
                 //externalVideoFrame.rotation = 180;
                 externalVideoFrame.timestamp = 0;
                 //Push the external video frame with the frame we just created
-                _rtcEngine.PushVideoFrame(externalVideoFrame);
+                lock (_rtclock)
+                {
+                    _rtcEngine.PushVideoFrame(externalVideoFrame);
+                }
                 if (++timestamp % 100 == 0)
                 {
                     Debug.Log("Pushed video frame = " + timestamp);

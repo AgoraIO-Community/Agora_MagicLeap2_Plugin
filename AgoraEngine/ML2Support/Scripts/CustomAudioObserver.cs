@@ -7,7 +7,7 @@ using RingBuffer;
 using Agora_RTC_Plugin.API_Example.Examples.Advanced.ProcessAudioRawData;
 using Agora.Util;
 
-namespace agora_sample
+namespace Agora.Rtc.Extended
 {
     /// <summary>
     /// The Custom AudioSink Player class receives audio frames from the

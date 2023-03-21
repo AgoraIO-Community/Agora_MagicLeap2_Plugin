@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using Agora.Rtc;
 using Agora.Util;
 
-namespace agora_sample
+namespace Agora.Rtc.Extended
 {
     /// <summary>
     ///   The Video Render Manager manages the remote user's view transform.  
