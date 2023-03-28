@@ -48,10 +48,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 496dcca0763834c9ca7913edacec606a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  APP_ID: 00e97fd319264c1ea2be69a370bd712e
-  UseToken: 0
-  CHANNEL_NAME: unity3d
+  APP_ID: 
+  UseTokenClient: 0
+  TOKEN: 
+  CHANNEL_NAME: ml2demo
   CLIENT_ROLE: 1
+  LogLevel: 1
   SpawnPoint: {fileID: 0}
   logText: {fileID: 0}
   ReferenceTransform: {fileID: 0}
@@ -202,6 +204,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7292bdf3e99b5cc42be5eb9a71b91d55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CHANNEL: 1
+  SAMPLE_RATE: 44100
+  PULL_FREQ_PER_SEC: 100
+  DebugFlag: 0
+  DebugCheck: 10
 --- !u!1 &4485746669347922253
 GameObject:
   m_ObjectHideFlags: 0
@@ -246,6 +253,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f15af3a013ef15047b3837e2a7dfe476, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BitRate: 1000
+  MLFrameRate: 2
+  MLQuality: 1
+  MLConnectFlag: 2
 --- !u!1 &4639081902220624982
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,7 +302,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff2dfae1cb3824047a647bd2af2c78cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InputAudioSource: {fileID: 0}
 --- !u!82 &2728559731536843762
 AudioSource:
   m_ObjectHideFlags: 0

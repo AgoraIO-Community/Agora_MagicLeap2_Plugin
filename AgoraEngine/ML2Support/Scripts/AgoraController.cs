@@ -18,8 +18,9 @@ namespace Agora.Rtc.Extended
 
         [SerializeField]
         [Tooltip("Use TokenClient to connect to a predefined token server. Unmark it if your AppID doesnot use token.")]
-        public bool UseToken = false;
+        public bool UseTokenClient = false;
 
+        [SerializeField]
         private string TOKEN = "";
 
         [SerializeField]
@@ -124,7 +125,7 @@ namespace Agora.Rtc.Extended
             CustomAudioCapture?.Init(_rtcEngine, RtcLock);
 
             // If AppID is certifcate enabled, use token.
-            if (UseToken)
+            if (UseTokenClient)
             {
                 TokenClient.Instance.SetClient(
           CLIENT_ROLE == CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER ? ClientType.publisher : ClientType.subscriber);
@@ -263,10 +264,15 @@ namespace Agora.Rtc.Extended
 
             public override void OnTokenPrivilegeWillExpire(RtcConnection connection, string token)
             {
-                if (_app.UseToken)
+                if (_app.UseTokenClient)
                 {
                     base.OnTokenPrivilegeWillExpire(connection, token);
                     TokenClient.Instance.OnTokenPrivilegeWillExpireHandler(token);
+                }
+                else
+                {
+                    // if you are using your own logic without the TokenClient, please implement here
+                    _app._logger.UpdateLog(string.Format("OnTokenPrivilegeWillExpire, connection:" + connection.channelId));
                 }
             }
 
