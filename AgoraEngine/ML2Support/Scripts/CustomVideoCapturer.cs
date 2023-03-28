@@ -387,6 +387,11 @@ namespace Agora.Rtc.Extended
         }
         #endregion
 #else
+        public override void Init(IRtcEngine engine, object rtclock)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public override void ConnectCamera()
         {
             throw new System.NotImplementedException();
