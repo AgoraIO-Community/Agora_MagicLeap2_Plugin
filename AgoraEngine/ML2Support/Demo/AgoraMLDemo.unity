@@ -547,6 +547,12 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!82 &313531297 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 2728559731536843762, guid: 7fe6e185edeea4434a1421a08226a74a,
+    type: 3}
+  m_PrefabInstance: {fileID: 8026431351379875335}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &313531299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1024,7 +1030,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 2
+  m_Version: 3
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
   m_LightLayerMask: 1
@@ -1034,7 +1040,7 @@ MonoBehaviour:
   m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
-  m_SoftShadowQuality: 1
+  m_SoftShadowQuality: 2
 --- !u!1 &1069797592
 GameObject:
   m_ObjectHideFlags: 0
@@ -1162,16 +1168,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1359980009267695964, guid: 6906f74934047d24e9a47bbdd1afb57a,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1359980009267695964, guid: 6906f74934047d24e9a47bbdd1afb57a,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5355557165450182212, guid: 6906f74934047d24e9a47bbdd1afb57a,
         type: 3}
@@ -1927,6 +1923,18 @@ RectTransform:
   m_AnchoredPosition: {x: 207, y: -145}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2123939088 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1512593271744470006, guid: 7fe6e185edeea4434a1421a08226a74a,
+    type: 3}
+  m_PrefabInstance: {fileID: 8026431351379875335}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff2dfae1cb3824047a647bd2af2c78cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8026431351379875335
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1935,21 +1943,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1512593271744470006, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512593271744470006, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: InputAudioSource
+      value: 
+      objectReference: {fileID: 313531297}
     - target: {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
       propertyPath: APP_ID
-      value: 
+      value: ebe5924d60e7482aa03f8c74afb5c881
       objectReference: {fileID: 0}
     - target: {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
       propertyPath: logText
       value: 
       objectReference: {fileID: 985624462}
-    - target: {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a,
-        type: 3}
-      propertyPath: UseToken
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
       propertyPath: SpawnPoint
@@ -2035,12 +2048,88 @@ PrefabInstance:
       propertyPath: m_Name
       value: AgoraController
       objectReference: {fileID: 0}
-    - target: {fileID: 8537417665594558118, guid: 7fe6e185edeea4434a1421a08226a74a,
+    - target: {fileID: 2277068097837916318, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
-      propertyPath: MLQuality
-      value: 3
+      propertyPath: DebugFlag
+      value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 2277068097837916318, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: DebugCheck
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 2728559731536843762, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: m_Volume
+      value: 0.054
+      objectReference: {fileID: 0}
+    - target: {fileID: 2728559731536843762, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2728559731536843762, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: ab0b3756ed665478ca7731aff7220062, type: 3}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: TOKEN
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: APP_ID
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: logText
+      value: 
+      objectReference: {fileID: 985624462}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: SpawnPoint
+      value: 
+      objectReference: {fileID: 88421317}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: CHANNEL_NAME
+      value: ml2test
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: ConnectButton
+      value: 
+      objectReference: {fileID: 1598720281}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: UseTokenClient
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: MuteLocalButton
+      value: 
+      objectReference: {fileID: 273147032}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: MuteRemoteButton
+      value: 
+      objectReference: {fileID: 2033698802}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: CustomAudioCapture
+      value: 
+      objectReference: {fileID: 2123939088}
+    - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: ReferenceTransform
+      value: 
+      objectReference: {fileID: 1118466283}
+    m_RemovedComponents:
+    - {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

@@ -1,27 +1,26 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
-using agora_gaming_rtc;
+using Agora.Rtc;
 using RingBuffer;
 
-namespace agora_sample
+namespace Agora.Rtc.Extended
 {
     /// <summary>
     /// The Custom AudioSink Player class receives audio frames from the
     /// Agora channel and applies the buffer to an AudioSource for playback.
     /// </summary>
-    public class CustomAudioSinkPlayer : MonoBehaviour
+    public class CustomAudioSinkPlayer : IAudioRenderManager
     {
         private IRtcEngine mRtcEngine = null;
-        private IAudioRawDataManager _audioRawDataManager;
 
         public int CHANNEL = 1;
         public int SAMPLE_RATE = 44100;
         public int PULL_FREQ_PER_SEC = 100;
         public bool DebugFlag = false;
-
-        const int BYTES_PER_SAMPLE = 2;
+        public int DebugCheck = 10;
 
         int SAMPLES;
         int FREQ;
@@ -30,9 +29,9 @@ namespace agora_sample
         private int writeCount = 0;
         private int readCount = 0;
 
-        private RingBuffer<float> audioBuffer;
+        private RingBuffer<float> _audioBuffer;
         private AudioClip _audioClip;
-
+        private object _rtclock;
 
         private Thread _pullAudioFrameThread = null;
         private bool _pullAudioFrameThreadSignal = true;
@@ -40,29 +39,31 @@ namespace agora_sample
         IntPtr BufferPtr { get; set; }
 
         // Start is called before the first frame update
-        void Start()
+        IEnumerator Start()
         {
             SAMPLES = SAMPLE_RATE / PULL_FREQ_PER_SEC * CHANNEL;
             FREQ = 1000 / PULL_FREQ_PER_SEC;
-            BUFFER_SIZE = SAMPLES * BYTES_PER_SAMPLE;
-
-            StartCoroutine(CoStartRunning());
-        }
-
-        System.Collections.IEnumerator CoStartRunning()
-        {
-            while (mRtcEngine == null)
-            {
-                yield return new WaitForFixedUpdate();
-                mRtcEngine = IRtcEngine.QueryEngine();
-            }
+            BUFFER_SIZE = SAMPLES * (int)BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE;
 
             var aud = GetComponent<AudioSource>();
             if (aud == null)
             {
                 aud = gameObject.AddComponent<AudioSource>();
             }
+
+
+            yield return new WaitWhile(() => mRtcEngine == null);
             KickStartAudio(aud, "externalClip");
+        }
+
+        public override void Init(IRtcEngine engine, object rtclock)
+        {
+            mRtcEngine = engine;
+            _rtclock = rtclock;
+            mRtcEngine.SetExternalAudioSink(true, SAMPLE_RATE, CHANNEL);
+
+            // Increase playback overall volume
+            mRtcEngine.AdjustPlaybackSignalVolume(200);
         }
 
         void KickStartAudio(AudioSource aud, string clipName)
@@ -70,9 +71,7 @@ namespace agora_sample
             var bufferLength = SAMPLES * 100; // 1-sec-length buffer
 
             // allow overflow to prevent edge case 
-            audioBuffer = new RingBuffer<float>(bufferLength, overflow: true);
-
-            _audioRawDataManager = AudioRawDataManager.GetInstance(mRtcEngine);
+            _audioBuffer = new RingBuffer<float>(bufferLength, overflow: true);
 
             // Create and start the AudioClip playback, OnAudioRead will feed it
             _audioClip = AudioClip.Create(clipName,
@@ -94,7 +93,6 @@ namespace agora_sample
             }
 
             _pullAudioFrameThread = new Thread(PullAudioFrameThread);
-            //_pullAudioFrameThread.Start("pullAudio" + writeCount);
             _pullAudioFrameThread.Start();
         }
 
@@ -105,7 +103,7 @@ namespace agora_sample
             {
                 if (DebugFlag)
                 {
-                    Debug.Log("Application paused. AudioBuffer length = " + audioBuffer.Size);
+                    Debug.Log("Application paused. AudioBuffer length = " + _audioBuffer.Size);
                     Debug.Log("PullAudioFrameThread state = " + _pullAudioFrameThread.ThreadState + " signal =" + _pullAudioFrameThreadSignal);
                 }
 
@@ -119,7 +117,7 @@ namespace agora_sample
                 if (_paused) // had been paused, not from starting up
                 {
                     Debug.Log("Resuming PullAudioThread");
-                    audioBuffer.Clear();
+                    _audioBuffer.Clear();
                     StartPullAudioThread();
                 }
             }
@@ -130,7 +128,7 @@ namespace agora_sample
         {
             Debug.Log("OnApplicationQuit");
             _pullAudioFrameThreadSignal = false;
-            audioBuffer.Clear();
+            _audioBuffer.Clear();
             if (BufferPtr != IntPtr.Zero)
             {
                 Debug.LogWarning("cleanning up IntPtr buffer");
@@ -138,51 +136,74 @@ namespace agora_sample
                 BufferPtr = IntPtr.Zero;
             }
         }
+        //get timestamp millisecond
+        private double GetTimestamp()
+        {
+            TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return ts.TotalMilliseconds;
+        }
 
         private void PullAudioFrameThread()
         {
-            BufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
+            var avsync_type = 0;
+            var bytesPerSample = 2;
+            var type = AUDIO_FRAME_TYPE.FRAME_TYPE_PCM16;
+            var channels = CHANNEL;
+            var samples = SAMPLE_RATE / PULL_FREQ_PER_SEC * CHANNEL;
+            var samplesPerSec = SAMPLE_RATE;
+            var buffer = new byte[samples * bytesPerSample];
+            var freq = 1000 / PULL_FREQ_PER_SEC;
+
+            // BufferPtr = Marshal.AllocHGlobal(BUFFER_SIZE);
 
             var tic = new TimeSpan(DateTime.Now.Ticks);
 
             var byteArray = new byte[BUFFER_SIZE];
-            long pullCount = 0;
+            double startMillisecond = GetTimestamp();
+            long tick = 0;
 
+            AudioFrame audioFrame = new AudioFrame(
+             type, samples, BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE, channels, samplesPerSec, buffer, 0, avsync_type);
+            BufferPtr = Marshal.AllocHGlobal(samples * bytesPerSample * channels);
+            audioFrame.buffer = BufferPtr;
+
+            Debug.Log("[Agora] PullAudioFrameThread starts, audioFrame buffer = " + audioFrame.buffer);
+            int loopcount = 0;
             while (_pullAudioFrameThreadSignal)
             {
-                var toc = new TimeSpan(DateTime.Now.Ticks);
-                if (toc.Subtract(tic).Duration().Milliseconds >= FREQ)
+                int nRet = -1;
+                lock (_rtclock)
                 {
-                    tic = new TimeSpan(DateTime.Now.Ticks);
-                    int rc = _audioRawDataManager.PullAudioFrame(BufferPtr,
-                        type: (int)AUDIO_FRAME_TYPE.FRAME_TYPE_PCM16,
-                     samples: SAMPLES,
-              bytesPerSample: 2,
-                    channels: CHANNEL,
-               samplesPerSec: SAMPLE_RATE,
-                renderTimeMs: 0,
-                 avsync_type: 0);
-
-                    if (rc < 0)
+                    if (mRtcEngine == null)
                     {
-                        if (pullCount % 1000 == 0 && pullCount < 100000)
-                        {
-                            Debug.LogWarning("PullAudioFrame returns " + rc);
-                        }
-                        pullCount++;
-                        continue;
+                        break;
                     }
+                    Debug.Assert(audioFrame.buffer != null, "Audio Buffer is null!");
+                    nRet = mRtcEngine.PullAudioFrame(audioFrame);
+                }
 
-                    Marshal.Copy(BufferPtr, byteArray, 0, BUFFER_SIZE);
-
-                    var floatArray = ConvertByteToFloat16(byteArray);
-                    lock (audioBuffer)
+                if (nRet == 0)
+                {
+                    Marshal.Copy((IntPtr)audioFrame.buffer, buffer, 0, buffer.Length);
+                    var floatArray = ConvertByteToFloat16(buffer);
+                    lock (_audioBuffer)
                     {
-                        audioBuffer.Put(floatArray);
+                        _audioBuffer.Put(floatArray);
+                        writeCount += floatArray.Length;
                     }
+                }
+                if (++loopcount % DebugCheck == 0) Debug.Log("nRec = " + nRet);
 
-                    writeCount += floatArray.Length;
-                    if (DebugFlag) Debug.Log("PullAudioFrame rc = " + rc + " writeCount = " + writeCount);
+                if (nRet == 0)
+                {
+                    tick++;
+                    double nextMillisecond = startMillisecond + tick * freq;
+                    double curMillisecond = GetTimestamp();
+                    int sleepMillisecond = (int)Math.Ceiling(nextMillisecond - curMillisecond);
+                    if (sleepMillisecond > 0)
+                    {
+                        Thread.Sleep(sleepMillisecond);
+                    }
                 }
 
             }
@@ -212,11 +233,11 @@ namespace agora_sample
         {
             for (var i = 0; i < data.Length; i++)
             {
-                lock (audioBuffer)
+                lock (_audioBuffer)
                 {
-                    if (audioBuffer.Count > 0)
+                    if (_audioBuffer.Count > 0)
                     {
-                        data[i] = audioBuffer.Get();
+                        data[i] = _audioBuffer.Get();
                     }
                     else
                     {
@@ -225,13 +246,9 @@ namespace agora_sample
                     }
                 }
 
-                readCount += 1;
+                readCount += data.Length;
             }
 
-            if (DebugFlag)
-            {
-                Debug.LogFormat("buffer length remains: {0}", writeCount - readCount);
-            }
         }
     }
 }

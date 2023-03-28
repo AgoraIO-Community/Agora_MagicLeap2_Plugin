@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2277068096631128599}
-  - component: {fileID: 2277068096631128598}
+  - component: {fileID: 8615111217482490128}
   m_Layer: 0
   m_Name: AgoraController
   m_TagString: Untagged
@@ -34,9 +34,9 @@ Transform:
   - {fileID: 9118921474007055951}
   - {fileID: 3040584489502813668}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2277068096631128598
+--- !u!114 &8615111217482490128
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -49,8 +49,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   APP_ID: 
-  UseToken: 0
-  CHANNEL_NAME: ml2test
+  UseTokenClient: 0
+  TOKEN: 
+  CHANNEL_NAME: ml2demo
+  CLIENT_ROLE: 1
+  LogLevel: 1
   SpawnPoint: {fileID: 0}
   logText: {fileID: 0}
   ReferenceTransform: {fileID: 0}
@@ -205,6 +208,7 @@ MonoBehaviour:
   SAMPLE_RATE: 44100
   PULL_FREQ_PER_SEC: 100
   DebugFlag: 0
+  DebugCheck: 10
 --- !u!1 &4485746669347922253
 GameObject:
   m_ObjectHideFlags: 0
@@ -249,9 +253,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f15af3a013ef15047b3837e2a7dfe476, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BitRate: 3420
+  BitRate: 1000
   MLFrameRate: 2
-  MLQuality: 5
+  MLQuality: 1
   MLConnectFlag: 2
 --- !u!1 &4639081902220624982
 GameObject:
@@ -298,7 +302,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff2dfae1cb3824047a647bd2af2c78cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InputAudioSource: {fileID: 0}
 --- !u!82 &2728559731536843762
 AudioSource:
   m_ObjectHideFlags: 0
@@ -436,9 +439,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8402866730383717436}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acf6806603dac4540b342bc5626f300d, type: 3}
+  m_Script: {fileID: 11500000, guid: 987deca9575e246f4b9c9ad85088368b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   clientType: 0
-  serverURL: http://localhost:8080
+  serverURL: 
   ExpirationSecs: 3600

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-namespace agora_utilities
+namespace Agora.Util
 {
     [RequireComponent(typeof(Button))]
     public class ToggleStateButton : MonoBehaviour
