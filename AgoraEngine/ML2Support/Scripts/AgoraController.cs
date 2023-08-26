@@ -2,6 +2,8 @@
 using UnityEngine.UI;
 using Agora.Rtc;
 using Agora.Util;
+using Agora_RTC_Plugin.API_Example;
+using Logger = Agora_RTC_Plugin.API_Example.Logger;
 
 namespace Agora.Rtc.Extended
 {
@@ -50,7 +52,7 @@ namespace Agora.Rtc.Extended
         [SerializeField]
         IAudioCaptureManager CustomAudioCapture;
 
-        internal agora_utilities.Logger _logger;
+        internal Logger _logger;
         private IRtcEngine _rtcEngine = null;
         private uint _clientUID = 0;  // used for join channel, default is 0
 
@@ -87,7 +89,7 @@ namespace Agora.Rtc.Extended
                 Debug.LogError($"----- AppID must be provided for {name}! -----");
                 return false;
             }
-            _logger = new agora_utilities.Logger(logText);
+            _logger = new Logger(logText);
             return true;
         }
 
@@ -110,7 +112,7 @@ namespace Agora.Rtc.Extended
             Debug.Assert(rc == 0, "rtcEngine init handler failed");
 
             _rtcEngine.EnableAudio();
-            _rtcEngine.SetExternalAudioSource(true, CustomAudioCapturer.SAMPLE_RATE, CustomAudioCapturer.CHANNEL, 1);
+            _rtcEngine.SetExternalAudioSource(true, CustomAudioCapturer.SAMPLE_RATE, CustomAudioCapturer.CHANNEL);
 
             _rtcEngine.SetClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
             _rtcEngine.SetAudioProfile(AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT, AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING);

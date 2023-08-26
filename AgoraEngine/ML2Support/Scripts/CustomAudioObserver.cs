@@ -6,6 +6,7 @@ using Agora.Rtc;
 using RingBuffer;
 using Agora_RTC_Plugin.API_Example.Examples.Advanced.ProcessAudioRawData;
 using Agora.Util;
+using Agora_RTC_Plugin.API_Example;
 
 namespace Agora.Rtc.Extended
 {

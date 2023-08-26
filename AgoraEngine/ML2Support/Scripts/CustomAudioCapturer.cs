@@ -108,7 +108,7 @@ namespace Agora.Rtc.Extended
                 {
                     lock (_rtclock)
                     {
-                        nRet = mRtcEngine.PushAudioFrame(MEDIA_SOURCE_TYPE.AUDIO_PLAYOUT_SOURCE, _audioFrame);
+                        nRet = mRtcEngine.PushAudioFrame(_audioFrame);
                     }
                     tick++;
                 }
