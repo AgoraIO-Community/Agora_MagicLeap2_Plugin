@@ -163,7 +163,7 @@ namespace Agora.Rtc.Extended
             long tick = 0;
 
             AudioFrame audioFrame = new AudioFrame(
-             type, samples, BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE, channels, samplesPerSec, buffer, 0, avsync_type);
+             type, samples, BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE, channels, samplesPerSec, buffer, 0, avsync_type, 0);
             BufferPtr = Marshal.AllocHGlobal(samples * bytesPerSample * channels);
             audioFrame.buffer = BufferPtr;
 
