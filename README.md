@@ -8,6 +8,8 @@ In additional to the original plugin contents, a ML2Demo folder is added for Mag
 
 Unless making Pull Request for changes, developer should just download the unity package from [the Release section](https://github.com/AgoraIO-Community/Agora_MagicLeap2_Plugin/releases), without cloning this project.
 
+Note that this repo uses submodules.  Please use `git clone --recurse-submodules` to set up your local copy correctly.
+
 The ML2 Unity Editor and Android API requirements supersedes Agora's SDK requirements.  Please see the official MagicLeap guidelines on Unity development environment.
  
  
