@@ -2,7 +2,7 @@
 This document describes the contents of the Agora Unity SDK and usage of the sample prefabs and scripts.
 
 ## SDK Contents
-The Agora Unity SDK is based on the official Agora Video SDK for Unity, version 4.1.0.  
+The Agora Unity SDK is based on the official Agora Video SDK for Unity, version 4.2.6.  
 
 In additional to the original plugin contents, a ML2Demo folder is added for MagicLeap2 exclusively.  
 
