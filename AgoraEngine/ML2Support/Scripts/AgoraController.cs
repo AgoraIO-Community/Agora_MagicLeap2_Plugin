@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using Agora.Rtc;
 using Agora.Util;
 using Logger = Agora_RTC_Plugin.API_Example.Logger;
+using Agora_RTC_Plugin.API_Example;
 
 namespace Agora.Rtc.Extended
 {
@@ -48,8 +48,6 @@ namespace Agora.Rtc.Extended
         [Header("Audio Control")]
         [SerializeField]
         IAudioRenderManager CustomAudioSink;
-        [SerializeField]
-        IAudioCaptureManager CustomAudioCapture;
 
         internal uint AUDIO_TRACK_ID = 0;
 
@@ -79,9 +77,15 @@ namespace Agora.Rtc.Extended
             if (appReady)
             {
                 InitEngine();
-                CreateCustomAudioSource();
                 PrepareJoinChannel(callback: JoinChannel);
             }
+        }
+
+        // Update is called once per frame
+        private void Update()
+        {
+            PermissionHelper.RequestMicrophontPermission();
+            PermissionHelper.RequestCameraPermission();
         }
 
         // Simple check for APP ID input in case it is forgotten
@@ -124,7 +128,6 @@ namespace Agora.Rtc.Extended
 
             CustomVideoCapture?.Init(_rtcEngine, RtcLock);
             CustomAudioSink?.Init(_rtcEngine, RtcLock);
-            CustomAudioCapture?.Init(_rtcEngine, RtcLock);
         }
 
         void PrepareJoinChannel(System.Action callback)
@@ -145,16 +148,6 @@ namespace Agora.Rtc.Extended
             else
             {
                 callback();
-            }
-        }
-
-        void CreateCustomAudioSource()
-        {
-            lock (RtcLock)
-            {
-                AudioTrackConfig audioTrackConfig = new AudioTrackConfig(enableLocalPlayback: false);
-                AUDIO_TRACK_ID = _rtcEngine.CreateCustomAudioTrack(AUDIO_TRACK_TYPE.AUDIO_TRACK_DIRECT, audioTrackConfig);
-                _logger.UpdateLog("AUDIO_TRACK_ID:" + AUDIO_TRACK_ID);
             }
         }
 
@@ -188,21 +181,12 @@ namespace Agora.Rtc.Extended
             var option = new ChannelMediaOptions();
             option.autoSubscribeVideo.SetValue(true);
             option.autoSubscribeAudio.SetValue(true);
-            option.publishMicrophoneTrack.SetValue(false);
             option.publishCameraTrack.SetValue(false);
-            option.publishCustomAudioTrack.SetValue(true);
-            option.publishCustomAudioTrackId.SetValue((int)AUDIO_TRACK_ID);
             option.publishCustomVideoTrack.SetValue(true);
             option.clientRoleType.SetValue(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
             option.channelProfile.SetValue(CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING);
 
             _rtcEngine.JoinChannel(TOKEN, CHANNEL_NAME, _clientUID, option);
-        }
-
-
-        void OnVideoSizeChanged(uint uid, int width, int height, int rotation)
-        {
-            VideoRenderMgr.UpdateVideoView(uid, width, height, rotation);
         }
 
 
@@ -241,7 +225,6 @@ namespace Agora.Rtc.Extended
                     _app._rtcEngine.GetVersion(ref build)));
                 _app._logger.UpdateLog(string.Format("OnJoinChannelSuccess channelName: {0}, uid: {1}, elapsed: {2}",
                         connection.channelId, connection.localUid, elapsed));
-                _app.CustomAudioCapture?.StartAudioPush();
             }
 
             public override void OnRejoinChannelSuccess(RtcConnection connection, int elapsed)
@@ -252,7 +235,6 @@ namespace Agora.Rtc.Extended
             public override void OnLeaveChannel(RtcConnection connection, RtcStats stats)
             {
                 _app._logger.UpdateLog("OnLeaveChannel");
-                _app.CustomAudioCapture?.StopAudioPush();
             }
 
             public override void OnClientRoleChanged(RtcConnection connection, CLIENT_ROLE_TYPE oldRole, CLIENT_ROLE_TYPE newRole, ClientRoleOptions newRoleOptions)
