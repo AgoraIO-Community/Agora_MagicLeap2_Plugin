@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using UnityEngine;
-using Agora.Rtc;
 using RingBuffer;
 
 #if ML2_ENABLE
@@ -80,7 +78,6 @@ namespace Agora.Rtc.Extended
                 RawBuffer = new byte[BufferLength],
                 renderTimeMs = 1000 / PUSH_FREQ_PER_SEC
             };
-            AgoraLog.Log("BufferLength = " + BufferLength);
         }
 
         private void Update()
@@ -208,10 +205,10 @@ namespace Agora.Rtc.Extended
             }
 
             _count += 1;
-            //if (_count % 100 == 0)
-            //{
-            //    Debug.Log($"AGORA: HandleAudioBuffer count:{_count}");
-            //}
+            if (_count % 100 == 0)
+            {
+                Debug.Log($"AGORA: HandleAudioBuffer count:{_count}");
+            }
         }
 
         // This method receives data from the audio source by the Unity engine
