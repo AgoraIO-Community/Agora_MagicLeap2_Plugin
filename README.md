@@ -21,7 +21,7 @@ Please see Agora_MagicLeap2_Plugin/AgoraEngine/ML2Support/ML2Demo.  Simply drag 
 ### Reusable Components
 For the MagicLeap2, Application that uses Agora for native RTC support must use **custom video and audio** capturing and rendering techniques respectively.  The scripts under the *agora_sample* namespace are refactored components that enable low-code solution:
 
- - **CustomAudioCapturer**: this script captures the local user's audio via Unity's Microphone interface and push the raw audio into Agora SD-RTN.  This is required if the ML2 user is a broadcaster.
+ - **CustomAudioCapturer**: this script captures the local user's audio via Unity's Microphone interface and push the raw audio into Agora SD-RTN.  This is only required if the ML2 user is a broadcaster and the MagicLeap SDK is v2.0.0 or lower.
  - **CustomAudioSinkPlayer**: this script receives the remote users' audio data and play the stream on a AudioSource component.  This is required.
  - **CustomVideoCapturer**: this script captures the local user's camera view and send it into the Agora SD-RTN.  The code utilized ML2's MLCamera capabilities to capture the raw video data from the camera. There are options to be set in the Inspector to accommodate different capturing parameters, such as resolution and XR/Camera modes.  This component can be replaced with other capturing methods.  Use the *ShareScreen* method in the script as an example to push raw data that is capture using other means.
  - **VideoRenderManager**: this script provides basic 2D rendering for the remote users' video stream.  Developer should override the virtual methods *MakeVideoView()* and *UpdateVideoView()* to accommodate different UI design. 
@@ -49,7 +49,7 @@ The following tables explains the fields that should be filed in the Inspector.
 |Mute Remote Button|A Button that enables/disables remote user's audio|No
 |Custom Video Capture |The Video Capture component, see **CustomVideoCapturer.cs**|Yes
 |Custom Audio Sink|The audio sink component, see **CustomAudioSinkPlayer.cs**| Yes
-|Custom Audio Capture|The audio capture component, see **CustomAudioCapturer.cs**|Yes
+|Custom Audio Capture|The audio capture component, see **CustomAudioCapturer.cs**|not needed after MLSDK v2.1.0
 
 Lastly, there is a **VideoRenderManager** class that implements the view placement of user video streams.  It is recommended to implement the IVideoRenderManager interface for your own applications design.
 
@@ -73,3 +73,4 @@ As an example a chosen endpoint is "https://agoraml2test.herokuapp.com/".  Copy 
 ## License
 
 MIT license.
+

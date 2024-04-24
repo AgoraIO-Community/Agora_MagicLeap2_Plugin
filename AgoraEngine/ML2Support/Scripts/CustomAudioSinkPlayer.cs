@@ -162,8 +162,16 @@ namespace Agora.Rtc.Extended
             double startMillisecond = GetTimestamp();
             long tick = 0;
 
-            AudioFrame audioFrame = new AudioFrame(
-             type, samples, BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE, channels, samplesPerSec, buffer, 0, avsync_type, 0);
+            AudioFrame audioFrame = new AudioFrame
+            {
+                type = type,
+                samplesPerChannel = samples,
+                bytesPerSample = BYTES_PER_SAMPLE.TWO_BYTES_PER_SAMPLE,
+                channels = channels,
+                samplesPerSec = samplesPerSec,
+                avsync_type = avsync_type,
+            };
+
             BufferPtr = Marshal.AllocHGlobal(samples * bytesPerSample * channels);
             audioFrame.buffer = BufferPtr;
 
@@ -205,7 +213,6 @@ namespace Agora.Rtc.Extended
                         Thread.Sleep(sleepMillisecond);
                     }
                 }
-
             }
 
             if (BufferPtr != IntPtr.Zero)

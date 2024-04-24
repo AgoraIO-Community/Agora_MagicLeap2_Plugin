@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18064547, g: 0.22614636, b: 0.30711892, a: 1}
+  m_IndirectSpecularColor: {r: 0.18060996, g: 0.22608182, b: 0.30708373, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -437,12 +437,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!82 &313531297 stripped
-AudioSource:
-  m_CorrespondingSourceObject: {fileID: 2728559731536843762, guid: 7fe6e185edeea4434a1421a08226a74a,
-    type: 3}
-  m_PrefabInstance: {fileID: 8026431351379875335}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &313531299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1254,6 +1248,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0.00015258789
       objectReference: {fileID: 0}
+    - target: {fileID: 9144045080929779760, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9144045080993300992, guid: 6906f74934047d24e9a47bbdd1afb57a,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -1288,6 +1287,36 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Text
       value: This is simple Hello World example.
+      objectReference: {fileID: 0}
+    - target: {fileID: 9144045081349396370, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9144045081349396370, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9144045081349396370, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9144045081349396370, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9144045081349396370, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9144045081349396370, guid: 6906f74934047d24e9a47bbdd1afb57a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9144045081354614237, guid: 6906f74934047d24e9a47bbdd1afb57a,
         type: 3}
@@ -1625,18 +1654,6 @@ RectTransform:
   m_AnchoredPosition: {x: 207, y: -145}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2123939088 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1512593271744470006, guid: 7fe6e185edeea4434a1421a08226a74a,
-    type: 3}
-  m_PrefabInstance: {fileID: 8026431351379875335}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff2dfae1cb3824047a647bd2af2c78cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &8026431351379875335
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1654,7 +1671,7 @@ PrefabInstance:
         type: 3}
       propertyPath: InputAudioSource
       value: 
-      objectReference: {fileID: 313531297}
+      objectReference: {fileID: 0}
     - target: {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
       propertyPath: APP_ID
@@ -1775,6 +1792,11 @@ PrefabInstance:
       propertyPath: m_audioClip
       value: 
       objectReference: {fileID: 8300000, guid: ab0b3756ed665478ca7731aff7220062, type: 3}
+    - target: {fileID: 4639081902220624982, guid: 7fe6e185edeea4434a1421a08226a74a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
       propertyPath: TOKEN
@@ -1824,7 +1846,7 @@ PrefabInstance:
         type: 3}
       propertyPath: CustomAudioCapture
       value: 
-      objectReference: {fileID: 2123939088}
+      objectReference: {fileID: 0}
     - target: {fileID: 8615111217482490128, guid: 7fe6e185edeea4434a1421a08226a74a,
         type: 3}
       propertyPath: ReferenceTransform
@@ -1832,7 +1854,8 @@ PrefabInstance:
       objectReference: {fileID: 1118466283}
     m_RemovedComponents:
     - {fileID: 2277068096631128598, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 4639081902220624982, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7fe6e185edeea4434a1421a08226a74a, type: 3}
